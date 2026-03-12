@@ -23,7 +23,7 @@ const APP_STATE = {
         },
         pests: {},
         diseases: {},
-        weeds: [],
+        weeds: {},
         growth: {
             poblacion: 0,
             altura: 0,
@@ -575,6 +575,18 @@ function deleteRecord(index) {
 }
 
 function startMonitoring() {
+    // Reset and Initialize with zeros for ALL species
+    APP_STATE.monitoring.pests = {};
+    PEST_DB.invertebrates.forEach(p => APP_STATE.monitoring.pests[p.id] = 0);
+    PEST_DB.vertebrates.forEach(p => APP_STATE.monitoring.pests[p.id] = 0);
+    PEST_DB.beneficials.forEach(p => APP_STATE.monitoring.pests[p.id] = 0);
+
+    APP_STATE.monitoring.diseases = {};
+    DISEASE_DB.forEach(d => APP_STATE.monitoring.diseases[d.id] = 0);
+
+    APP_STATE.monitoring.weeds = {};
+    WEED_DB.forEach(w => APP_STATE.monitoring.weeds[w] = 0);
+
     renderView('monitor_header');
     getGPSCoordinates();
 }
@@ -961,33 +973,35 @@ function setDiseaseLevel(id, level) {
 }
 
 function renderMonitorWeeds() {
-    const selectedHtml = APP_STATE.monitoring.weeds.map((w, idx) => {
-        const currentLevel = w.level || 0;
+    let selectedHtml = '';
+    WEED_DB.forEach(wName => {
+        const currentLevel = APP_STATE.monitoring.weeds[wName] || 0;
 
         const isLow = currentLevel > 0;
         const isMed = currentLevel > 3;
         const isHigh = currentLevel > 6;
 
         let buttons = '';
-        buttons += `<button class="level-btn level-btn-zero ${currentLevel == 0 ? 'active' : ''}" onclick="setWeedLevel(${idx}, 0)">0</button>`;
-        for (let i = 1; i <= 3; i++) buttons += `<button class="level-btn btn-green ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel(${idx}, ${i})">${i}</button>`;
-        for (let i = 4; i <= 6; i++) buttons += `<button class="level-btn btn-yellow ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel(${idx}, ${i})">${i}</button>`;
-        for (let i = 7; i <= 9; i++) buttons += `<button class="level-btn btn-red ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel(${idx}, ${i})">${i}</button>`;
+        buttons += `<button class="level-btn level-btn-zero ${currentLevel == 0 ? 'active' : ''}" onclick="setWeedLevel('${wName}', 0)">0</button>`;
+        for (let i = 1; i <= 3; i++) buttons += `<button class="level-btn btn-green ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel('${wName}', ${i})">${i}</button>`;
+        for (let i = 4; i <= 6; i++) buttons += `<button class="level-btn btn-yellow ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel('${wName}', ${i})">${i}</button>`;
+        for (let i = 7; i <= 9; i++) buttons += `<button class="level-btn btn-red ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel('${wName}', ${i})">${i}</button>`;
 
-        return `
-            <div class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
+        selectedHtml += `
+            <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <div>
-                        <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${w.name}</span>
-                        <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.2rem;">Densidad de Población (Escala 0-9)</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <i data-lucide="sprout" style="width: 20px; height: 20px; color: var(--accent-emerald);"></i>
+                        <div>
+                            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${wName}</span>
+                            <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Densidad (0-9)</div>
+                        </div>
                     </div>
-                    <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.65rem; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.2);" onclick="removeWeed(${idx})">ELIMINAR</button>
-                </div>
-
-                <div class="threshold-indicator">
-                    <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
-                    <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
-                    <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
+                    <div class="threshold-indicator" style="margin-bottom: 0;">
+                        <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
+                        <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
+                        <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
+                    </div>
                 </div>
 
                 <div class="grid-0-9">
@@ -995,7 +1009,7 @@ function renderMonitorWeeds() {
                 </div>
             </div>
         `;
-    }).join('');
+    });
 
     return `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
@@ -1008,18 +1022,7 @@ function renderMonitorWeeds() {
             </button>
         </div>
         
-        <div class="card" style="margin-bottom: 1.5rem;">
-            <div class="field-group">
-                <label>Buscar Maleza</label>
-                <div style="position: relative;">
-                    <i data-lucide="search" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
-                    <input type="text" id="weed-search" class="input-modern" style="padding-left: 3rem;" placeholder="Escriba nombre..." oninput="filterWeeds()">
-                </div>
-            </div>
-            <div id="weed-results" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;"></div>
-        </div>
-
-        <div id="selected-weeds-list" class="monitoring-scroll">
+        <div class="monitoring-scroll">
             ${selectedHtml}
         </div>
         
@@ -1031,49 +1034,8 @@ function renderMonitorWeeds() {
     `;
 }
 
-function addWeedFromSelect(select) {
-    if (!select.value) return;
-    APP_STATE.monitoring.weeds.push({ name: select.value, level: 0 });
-    renderView('monitor_weeds');
-}
-
-function filterWeeds() {
-    const query = document.getElementById('weed-search').value.toLowerCase();
-    const resultsDiv = document.getElementById('weed-results');
-    if (!query) {
-        resultsDiv.innerHTML = '';
-        return;
-    }
-
-    const matches = WEED_DB.filter(w => w.toLowerCase().includes(query)).slice(0, 5);
-    resultsDiv.innerHTML = matches.map(m => `
-        <div class="card" style="padding: 0.75rem 1rem; margin-bottom: 0.5rem; background: rgba(0,242,254,0.05); cursor: pointer;" onclick="addWeedFromResults('${m}')">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>${m}</span>
-                <i data-lucide="plus" style="width: 16px; color: var(--accent-emerald);"></i>
-            </div>
-        </div>
-    `).join('');
-    if (window.lucide) window.lucide.createIcons();
-}
-
-function addWeedFromResults(name) {
-    if (APP_STATE.monitoring.weeds.some(w => w.name === name)) {
-        alert('Esta maleza ya ha sido agregada.');
-        return;
-    }
-    APP_STATE.monitoring.weeds.push({ name: name, level: 0 });
-    document.getElementById('weed-search').value = '';
-    renderView('monitor_weeds');
-}
-
-function removeWeed(index) {
-    APP_STATE.monitoring.weeds.splice(index, 1);
-    renderView('monitor_weeds');
-}
-
-function setWeedLevel(index, level) {
-    APP_STATE.monitoring.weeds[index].level = parseInt(level);
+function setWeedLevel(wName, level) {
+    APP_STATE.monitoring.weeds[wName] = parseInt(level);
     renderView('monitor_weeds');
 }
 
@@ -1151,6 +1113,7 @@ function saveAndFinish() {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
         coords: APP_STATE.monitoring.coords,
+        user: APP_STATE.user, // Guardar info del usuario que realizó el monitoreo
         ...APP_STATE.monitoring
     });
     localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
@@ -1159,7 +1122,7 @@ function saveAndFinish() {
         header: null,
         pests: {},
         diseases: {},
-        weeds: [],
+        weeds: {},
         growth: { poblacion: 0, altura: 0, lamina: 0, fenologia: 0 }
     };
 
