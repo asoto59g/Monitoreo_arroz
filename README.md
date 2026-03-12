@@ -1,6 +1,8 @@
 
 # Instalación y Uso de la Aplicación en Campo
 
+https://asoto59g.github.io/Monitoreo_arroz/
+
 ## 2. Instalar en el Teléfono
 
 1. Abra la **URL de GitHub Pages** en el navegador de su teléfono.
