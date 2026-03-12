@@ -806,6 +806,23 @@ function renderMonitorPests() {
     // Unified 4-step navigation
     const navHtml = renderMonitorNav('monitor_pests');
 
+    const iconMap = {
+        spodoptera: 'bug',
+        sogata: 'bug-play',
+        mocis: 'shrub',
+        oebalus: 'wind',
+        tibraca: 'shield',
+        minador: 'scissors',
+        acarospinki: 'microscope',
+        rupella: 'cloud-lightning',
+        ratas: 'mouse-pointer-2',
+        piches: 'bird',
+        gallito: 'bird',
+        aranas: 'spider',
+        mariquitas: 'circle-dot',
+        avispas: 'antenna'
+    };
+
     ['invertebrates', 'vertebrates', 'beneficials'].forEach(type => {
         const title = type === 'invertebrates' ? 'Plagas Invertebradas' : type === 'vertebrates' ? 'Plagas Vertebradas' : 'Benéficos';
         pestsHtml += `<h3 style="margin: 1.5rem 0 0.5rem; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 1px;">${title.toUpperCase()}</h3>`;
@@ -815,11 +832,15 @@ function renderMonitorPests() {
             const isLow = currentLevel > 0;
             const isMed = currentLevel > 1;
             const isHigh = currentLevel > 2;
+            const icon = iconMap[pest.id] || (type === 'beneficials' ? 'heart' : 'bug');
 
             pestsHtml += `
                 <div id="pest-${pest.id}" class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${pest.name}</span>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i data-lucide="${icon}" style="width: 20px; height: 20px; color: var(--accent-emerald);"></i>
+                            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${pest.name}</span>
+                        </div>
                         <div class="threshold-indicator" style="margin-bottom: 0;">
                             <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
                             <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
