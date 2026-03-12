@@ -29,7 +29,8 @@ const APP_STATE = {
             lamina: 0,
             fenologia: 0
         }
-    }
+    },
+    deferredPrompt: null
 };
 
 function saveData() {
@@ -115,6 +116,20 @@ const THRESHOLDS = {
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     renderView('dashboard');
+});
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    APP_STATE.deferredPrompt = e;
+    // Update UI notify the user they can install the PWA
+    renderView(APP_STATE.currentView);
+});
+
+window.addEventListener('appinstalled', (e) => {
+    console.log('PWA instalado con éxito');
+    APP_STATE.deferredPrompt = null;
 });
 
 function initNavigation() {
@@ -208,6 +223,13 @@ function renderDashboard() {
         <button id="sync-btn" class="btn btn-secondary" style="width: 100%; border: 1px solid var(--accent-emerald); color: var(--accent-emerald); margin-top: 1rem;" onclick="syncWithGoogleSheets()">
             ☁️ SINCRONIZAR CON GOOGLE SHEETS
         </button>
+
+        ${APP_STATE.deferredPrompt ? `
+        <div class="card" style="margin-top: 1.5rem; text-align: center; border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05);">
+            <p style="font-size: 0.9rem; margin-bottom: 1rem;">📲 Instale la App en su pantalla de inicio para acceso rápido.</p>
+            <button class="btn btn-primary" style="width: 100%;" onclick="installPWA()">INSTALAR APP</button>
+        </div>
+        ` : ''}
     `;
 }
 
@@ -939,4 +961,21 @@ async function syncWithGoogleSheets() {
             btn.disabled = false;
         }
     }
+}
+
+async function installPWA() {
+    if (!APP_STATE.deferredPrompt) return;
+
+    // Show the install prompt
+    APP_STATE.deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await APP_STATE.deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+
+    // We've used the prompt, and can't use it again, throw it away
+    APP_STATE.deferredPrompt = null;
+
+    // Refresh UI
+    renderView(APP_STATE.currentView);
 }
