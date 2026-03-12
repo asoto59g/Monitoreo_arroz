@@ -124,6 +124,7 @@ function initNavigation() {
             const view = item.getAttribute('data-view');
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
+            APP_STATE.currentView = view;
             renderView(view);
             window.scrollTo(0, 0);
         });
@@ -131,6 +132,7 @@ function initNavigation() {
 }
 
 function renderView(viewName) {
+    APP_STATE.currentView = viewName;
     const mainContent = document.getElementById('main-content');
 
     switch (viewName) {
@@ -203,17 +205,7 @@ function renderDashboard() {
             </div>
         </div>
 
-        <div class="card" style="padding: 1rem;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.5rem;">
-                <span>Sincronización</span>
-                <span>${percent}% Completo</span>
-            </div>
-            <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                <div style="width: ${percent}%; height: 100%; background: var(--accent-emerald); box-shadow: 0 0 10px var(--accent-emerald);"></div>
-            </div>
-        </div>
-
-        <button id="sync-btn" class="btn btn-secondary" style="width: 100%; border: 1px solid var(--accent-emerald); color: var(--accent-emerald);" onclick="syncWithGoogleSheets()">
+        <button id="sync-btn" class="btn btn-secondary" style="width: 100%; border: 1px solid var(--accent-emerald); color: var(--accent-emerald); margin-top: 1rem;" onclick="syncWithGoogleSheets()">
             ☁️ SINCRONIZAR CON GOOGLE SHEETS
         </button>
     `;
@@ -394,26 +386,39 @@ function renderRecords() {
 
     const list = records.slice().reverse().map((r, idx) => {
         const date = new Date(r.timestamp);
-        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = date.toLocaleDateString();
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const originalIdx = records.length - 1 - idx;
+
+        const h = r.header || {};
+        const coords = r.coords || {};
 
         return `
             <div class="card" style="padding: 1rem; border-left: 4px solid ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'};">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
                     <div>
-                        <div style="font-weight: 600; font-size: 1rem;">${r.header?.lote_name || 'Lote Desconocido'}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-secondary);">${dateStr}</div>
+                        <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-emerald);">${h.lote_name || 'Lote Descon.'}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-primary);">${dateStr} - ${timeStr}</div>
                     </div>
-                    <span style="font-size: 0.7rem; padding: 0.2rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.2); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'};">
-                        ${r.synced ? 'Sincronizado' : 'Pendiente'}
+                    <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.1); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; font-weight: 600;">
+                        ${r.synced ? 'SINC' : 'PEND'}
                     </span>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
-                    <div>Ciclo: ${r.header?.ciclo_name || '-'}</div>
-                    <div>Plaguero: ${r.header?.plaguero || '-'}</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    <div><strong>Ciclo:</strong> ${h.ciclo_name || '-'}</div>
+                    <div><strong>Variedad:</strong> ${h.variedad || '-'}</div>
+                    <div><strong>Plaguero:</strong> ${h.plaguero || '-'}</div>
+                    <div><strong>Área:</strong> ${h.area || '-'}</div>
                 </div>
+
+                <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    📍 Lat: ${coords.lat?.toFixed(5) || '?'}, Lon: ${coords.lon?.toFixed(5) || '?'}
+                </div>
+
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" style="flex: 1; padding: 0.4rem; font-size: 0.75rem; color: var(--accent-red);" onclick="deleteRecord(${originalIdx})">ELIMINAR</button>
+                    <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; color: var(--accent-red); border-color: rgba(248,113,113,0.3);" onclick="deleteRecord(${originalIdx})">BORRAR</button>
+                    ${!r.synced ? `<button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; border-color: var(--accent-emerald); color: var(--accent-emerald);" onclick="syncWithGoogleSheets()">SYNC</button>` : ''}
                 </div>
             </div>
         `;
@@ -421,12 +426,12 @@ function renderRecords() {
 
     return `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Registros</h2>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} total</div>
+            <h2>Historial</h2>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} registros</div>
         </div>
         
         <div class="monitoring-scroll">
-            ${list || '<p style="text-align: center; color: var(--text-secondary); margin-top: 3rem;">No hay registros guardados.</p>'}
+            ${list || '<p style="text-align: center; color: var(--text-secondary); margin-top: 3rem;">No hay registros locales.</p>'}
         </div>
     `;
 }
@@ -881,43 +886,52 @@ async function syncWithGoogleSheets() {
     }
 
     const btn = document.getElementById('sync-btn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '⏳ Sincronizando...';
-    btn.disabled = true;
+    const originalText = btn ? btn.innerHTML : 'Sincronizar';
+    if (btn) {
+        btn.innerHTML = '⏳ Sincronizando...';
+        btn.disabled = true;
+    }
 
-    // Use current URL from storage or prompt
     let scriptURL = localStorage.getItem('abc_sync_url');
-    if (!scriptURL) {
-        scriptURL = prompt('Por favor, ingrese la URL de su Google Apps Script:');
-        if (scriptURL) {
-            localStorage.setItem('abc_sync_url', scriptURL);
+    if (!scriptURL || scriptURL === 'null') {
+        scriptURL = prompt('Por favor, ingrese la URL de su Google Apps Script (Aplicación Web):');
+        if (scriptURL && scriptURL.trim() !== '') {
+            localStorage.setItem('abc_sync_url', scriptURL.trim());
         } else {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
             return;
         }
     }
 
     try {
+        console.log('Iniciando sincronización...', toSync.length, 'registros');
+
         // Enviar registros en una sola solicitud
-        const response = await fetch(scriptURL, {
+        await fetch(scriptURL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(toSync)
         });
 
-        // Marcamos como sincronizados
+        // Con no-cors no podemos ver el éxito real, pero si no tira error, asumimos envío
         toSync.forEach(r => r.synced = true);
         localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
 
-        alert(`¡Sincronización completada! ${toSync.length} registros enviados.`);
-        renderView('dashboard');
+        alert(`✅ Sincronización exitosa. ${toSync.length} registros enviados.`);
+        renderView(APP_STATE.currentView);
     } catch (error) {
         console.error('Error en sincronización:', error);
-        alert('Error al conectar con Google Sheets. Verifique su conexión y la URL del script.');
+        if (confirm('Error al conectar con Google Sheets. ¿Desea cambiar la URL del script?')) {
+            localStorage.removeItem('abc_sync_url');
+        }
     } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 }
