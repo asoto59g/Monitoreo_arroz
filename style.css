@@ -1,0 +1,367 @@
+:root {
+    --bg-dark: #0a0f1e;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-emerald: #00f2fe;
+    --accent-green: #4ade80;
+    --accent-red: #f87171;
+    --accent-yellow: #fbbf24;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --nav-bg: rgba(15, 23, 42, 0.8);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: radial-gradient(circle at top left, #1e293b 0%, #0a0f1e 100%);
+}
+
+.main-header {
+    padding: 1.5rem 1rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.logo-accent {
+    color: var(--accent-emerald);
+}
+
+.status-indicators {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.indicator {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--glass-bg);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+.content-view {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    padding-bottom: 5rem;
+}
+
+/* Glass Cards */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 4.5rem;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--glass-border);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.nav-item.active {
+    color: var(--accent-emerald);
+}
+
+.nav-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+}
+
+.nav-label {
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+/* Loader */
+.view-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--glass-bg);
+    border-top: 3px solid var(--accent-emerald);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Button styles */
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 1rem;
+    border: none;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-emerald), #00d2ff);
+    color: var(--bg-dark);
+}
+
+.btn-secondary {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+}
+
+.input-modern {
+    width: 100%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.input-modern:focus {
+    border-color: var(--accent-emerald);
+}
+
+.input-modern option {
+    background-color: #1e293b;
+    /* More opaque background for dropdown items */
+    color: var(--text-primary);
+}
+
+.field-group {
+    margin-bottom: 1rem;
+}
+
+.field-group label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+    margin-left: 0.5rem;
+}
+
+.level-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.level-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 0.6rem 0;
+    border-radius: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.level-btn.active[data-level="1"] {
+    background: var(--accent-green);
+    color: #000;
+    border-color: var(--accent-green);
+}
+
+.level-btn.active[data-level="2"] {
+    background: var(--accent-yellow);
+    color: #000;
+    border-color: var(--accent-yellow);
+}
+
+.level-btn.active[data-level="3"] {
+    background: var(--accent-red);
+    color: #fff;
+    border-color: var(--accent-red);
+}
+
+.level-btn.active[data-level="0"] {
+    background: var(--text-secondary);
+    color: var(--bg-dark);
+    border-color: var(--text-secondary);
+}
+
+.threshold-indicator {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 0.8rem;
+    padding: 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.threshold-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    opacity: 0.3;
+    transition: all 0.3s;
+}
+
+.threshold-dot.green {
+    background: var(--accent-green);
+}
+
+.threshold-dot.yellow {
+    background: var(--accent-yellow);
+}
+
+.threshold-dot.red {
+    background: var(--accent-red);
+}
+
+/* In a real app, these would be activated based on thresholds */
+.threshold-dot.active {
+    opacity: 1;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.grid-0-9 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 8px;
+}
+
+.level-btn-zero {
+    grid-row: span 3;
+    height: 100%;
+    font-size: 1.5rem !important;
+}
+
+/* Base button overrides for specifically colored buttons in 0-9 grid */
+.level-btn.btn-green.active {
+    background: var(--accent-green);
+    color: #000;
+}
+
+.level-btn.btn-yellow.active {
+    background: var(--accent-yellow);
+    color: #000;
+}
+
+.level-btn.btn-red.active {
+    background: var(--accent-red);
+    color: #fff;
+}
+
+.level-label {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.level-0 {
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+}
+
+.level-1 {
+    background: var(--accent-green);
+    color: #000;
+}
+
+.level-2 {
+    background: var(--accent-yellow);
+    color: #000;
+}
+
+.level-3 {
+    background: var(--accent-red);
+    color: #fff;
+}
+
+.sticky-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to top, var(--bg-dark) 50%, transparent);
+    z-index: 10;
+}
+
+.monitoring-scroll {
+    padding-bottom: 5rem;
+}
+
+.list-container {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
