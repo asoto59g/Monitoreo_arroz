@@ -195,49 +195,53 @@ function renderView(viewName) {
 function renderDashboard() {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     const pending = records.filter(r => !r.synced).length;
-    const synced = records.length - pending;
-    const percent = records.length > 0 ? Math.round((synced / records.length) * 100) : 0;
 
     return `
-        <div class="card">
+        <div class="card" style="margin-top: 1rem;">
             <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Hola, Plaguero</h1>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Listo para el monitoreo de hoy.</p>
         </div>
         
-        <div class="card" style="text-align: center; border: 1px dashed var(--accent-emerald);">
-            <p style="margin-bottom: 1.5rem;">Comience un nuevo registro de monitoreo</p>
-            <button class="btn btn-primary" onclick="startMonitoring()">NUEVO MONITOREO</button>
+        <div class="card" style="text-align: center; border: 1px dashed var(--accent-emerald); background: rgba(0, 242, 254, 0.03);">
+            <p style="margin-bottom: 1.5rem; font-weight: 500;">Comience un nuevo registro</p>
+            <button class="btn btn-primary" style="width: 100%; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);" onclick="startMonitoring()">NUEVO MONITOREO +</button>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="card" style="margin-bottom: 0;">
-                <p style="font-size: 0.8rem; color: var(--text-secondary);">TOTAL REGISTROS</p>
-                <p style="font-size: 1.5rem; font-weight: 600;">${records.length}</p>
+            <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
+                <p style="font-size:0.7rem; color: var(--text-secondary); margin-bottom: 0.3rem;">TOTAL</p>
+                <p style="font-size: 1.2rem; font-weight: 700;">${records.length}</p>
             </div>
-            <div class="card" style="margin-bottom: 0;">
-                <p style="font-size: 0.8rem; color: var(--text-secondary);">PENDIENTES</p>
-                <p style="font-size: 1.5rem; font-weight: 600; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
+            <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
+                <p style="font-size:0.7rem; color: var(--text-secondary); margin-bottom: 0.3rem;">PENDIENTES</p>
+                <p style="font-size: 1.2rem; font-weight: 700; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
             </div>
         </div>
 
-            ☁️ SINCRONIZAR CON GOOGLE SHEETS
-        </button>
+        <div class="card" style="padding: 1.2rem; border-color: ${pending > 0 ? 'var(--accent-emerald)' : 'var(--glass-border)'};">
+            <button id="sync-btn" class="btn btn-primary" 
+                    style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none;" 
+                    onclick="syncWithGoogleSheets()">
+                ☁️ SINCRONIZAR AHORA
+            </button>
+            <div style="text-align: center; margin-top: 0.8rem;">
+                <a href="#" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: underline;" onclick="localStorage.removeItem('abc_sync_url'); alert('URL borrada. Presione Sincronizar para pegar la nueva.'); renderView('dashboard'); return false;">🔧 Configurar URL de Script</a>
+            </div>
+        </div>
 
-        <div id="pwa-install-container" style="margin-top: 1.5rem;">
+        <div id="pwa-install-container">
             ${APP_STATE.deferredPrompt ? `
                 <div class="card" style="text-align: center; border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05);">
-                    <p style="font-size: 0.9rem; margin-bottom: 1rem;">📲 Instale la App en su pantalla de inicio para acceso rápido.</p>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="installPWA()">INSTALAR APP AHORA</button>
+                    <p style="font-size: 0.9rem; margin-bottom: 1rem;">📲 Instale la App para acceso rápido.</p>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="installPWA()">INSTALAR APP</button>
                 </div>
             ` : `
                 <div class="card" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); padding: 1rem;">
-                    <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;">💡 ¿Cómo instalar esta App?</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-                        Si no ve el botón de instalar, puede hacerlo manualmente:
-                        <br><br>
-                        <strong>En Android (Chrome):</strong> Toque los 3 puntos (⋮) arriba a la derecha y seleccione <strong>"Instalar aplicación"</strong> o "Agregar a la pantalla de inicio".
-                        <br><br>
-                        <strong>En iPhone (Safari):</strong> Toque el botón compartir (󰐧) y seleccione <strong>"Agregar a la pantalla de inicio"</strong>.
+                    <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-emerald);">💡 ¿Cómo instalar esta App?</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                        Si no ve el botón, use el menú de su navegador:<br>
+                        <strong>Android:</strong> ⋮ > Instalar app.<br>
+                        <strong>iPhone:</strong> 󰐧 > Agregar a inicio.
                     </p>
                 </div>
             `}
@@ -949,6 +953,9 @@ async function syncWithGoogleSheets() {
 
     try {
         console.log('Iniciando sincronización...', toSync.length, 'registros');
+        if (!scriptURL.includes('/exec')) {
+            alert('⚠️ ADVERTENCIA: La URL no parece ser de una "Aplicación Web" (debe terminar en /exec). Por favor, use el enlace "Cambiar URL" para corregirla.');
+        }
 
         // Enviar registros como texto plano para evitar preflight CORS y asegurar que llegue el body
         await fetch(scriptURL, {
@@ -972,6 +979,8 @@ async function syncWithGoogleSheets() {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
+        // Force re-render to ensure UI reflects any state changes correctly
+        renderView(APP_STATE.currentView);
     }
 }
 
