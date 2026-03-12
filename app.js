@@ -751,31 +751,31 @@ function saveHeaderAndNext() {
     renderView('monitor_pests');
 }
 
-function renderMonitorPests() {
-    let pestsHtml = '';
+function renderMonitorNav(activeView) {
+    const steps = [
+        { id: 'monitor_pests', icon: 'bug', label: 'Plagas' },
+        { id: 'monitor_diseases', icon: 'thermometer-sun', label: 'Enfer.' },
+        { id: 'monitor_weeds', icon: 'sprout', label: 'Malezas' },
+        { id: 'monitor_growth', icon: 'line-chart', label: 'Crecim.' }
+    ];
 
-    // Mock icon mapping for visual alignment with mockup
-    const iconMap = {
-        spodoptera: 'bug',
-        sogata: 'leaf',
-        mocis: 'shrub',
-        oebalus: 'wind',
-        tibraca: 'shield',
-        minador: 'scissors',
-        acarospinki: 'microscope',
-        rupella: 'cloud-lightning'
-    };
-
-    // Icon Grid (selection overview)
-    const iconGridHtml = `
-        <div class="icon-grid">
-            ${PEST_DB.invertebrates.slice(0, 8).map(p => `
-                <div class="icon-box ${APP_STATE.monitoring.pests[p.id] > 0 ? 'active' : ''}" onclick="document.getElementById('pest-${p.id}').scrollIntoView({behavior: 'smooth'})">
-                    <i data-lucide="${iconMap[p.id] || 'bug'}"></i>
+    return `
+        <div class="monitor-steps">
+            ${steps.map(step => `
+                <div class="step-item ${activeView === step.id ? 'active' : ''}" onclick="renderView('${step.id}')">
+                    <i data-lucide="${step.icon}"></i>
+                    <span>${step.label}</span>
                 </div>
             `).join('')}
         </div>
     `;
+}
+
+function renderMonitorPests() {
+    let pestsHtml = '';
+
+    // Unified 4-step navigation
+    const navHtml = renderMonitorNav('monitor_pests');
 
     ['invertebrates', 'vertebrates', 'beneficials'].forEach(type => {
         const title = type === 'invertebrates' ? 'Plagas Invertebradas' : type === 'vertebrates' ? 'Plagas Vertebradas' : 'Benéficos';
@@ -836,7 +836,7 @@ function renderMonitorPests() {
             </button>
         </div>
         
-        ${iconGridHtml}
+        ${navHtml}
         
         <div class="monitoring-scroll">
             ${pestsHtml}
@@ -955,6 +955,8 @@ function renderMonitorDiseases() {
             </button>
         </div>
         
+        ${renderMonitorNav('monitor_diseases')}
+        
         <div class="monitoring-scroll">
             ${diseaseHtml}
         </div>
@@ -1022,6 +1024,8 @@ function renderMonitorWeeds() {
             </button>
         </div>
         
+        ${renderMonitorNav('monitor_weeds')}
+        
         <div class="monitoring-scroll">
             ${selectedHtml}
         </div>
@@ -1050,6 +1054,8 @@ function renderMonitorGrowth() {
                 <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
             </button>
         </div>
+
+        ${renderMonitorNav('monitor_growth')}
         
         <div class="monitoring-scroll">
             <div class="card">
