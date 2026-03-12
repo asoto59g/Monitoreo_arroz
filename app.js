@@ -383,6 +383,7 @@ function deleteItem(collection, id) {
 
 function renderRecords() {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+    const pending = records.filter(r => !r.synced).length;
 
     const list = records.slice().reverse().map((r, idx) => {
         const date = new Date(r.timestamp);
@@ -417,8 +418,7 @@ function renderRecords() {
                 </div>
 
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; color: var(--accent-red); border-color: rgba(248,113,113,0.3);" onclick="deleteRecord(${originalIdx})">BORRAR</button>
-                    ${!r.synced ? `<button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; border-color: var(--accent-emerald); color: var(--accent-emerald);" onclick="syncWithGoogleSheets()">SYNC</button>` : ''}
+                    <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; color: var(--accent-red); border-color: rgba(248,113,113,0.3);" onclick="deleteRecord(${originalIdx})">ELIMINAR REGISTRO LOCAL</button>
                 </div>
             </div>
         `;
@@ -429,6 +429,13 @@ function renderRecords() {
             <h2>Historial</h2>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} registros</div>
         </div>
+
+        ${pending > 0 ? `
+        <div class="card" style="border: 1px solid var(--accent-yellow); padding: 1rem; text-align: center; margin-bottom: 1.5rem;">
+            <p style="font-size: 0.85rem; color: var(--accent-yellow); margin-bottom: 0.8rem;">⚠️ Tiene ${pending} registros sin respaldar</p>
+            <button id="sync-btn-all" class="btn btn-primary" style="width: 100%;" onclick="syncWithGoogleSheets()">SINCRONIZAR TODO AHORA</button>
+        </div>
+        ` : ''}
         
         <div class="monitoring-scroll">
             ${list || '<p style="text-align: center; color: var(--text-secondary); margin-top: 3rem;">No hay registros locales.</p>'}
@@ -885,10 +892,10 @@ async function syncWithGoogleSheets() {
         return;
     }
 
-    const btn = document.getElementById('sync-btn');
+    const btn = document.getElementById('sync-btn') || document.getElementById('sync-btn-all');
     const originalText = btn ? btn.innerHTML : 'Sincronizar';
     if (btn) {
-        btn.innerHTML = '⏳ Sincronizando...';
+        btn.innerHTML = '⏳ Transfiriendo...';
         btn.disabled = true;
     }
 
@@ -921,13 +928,11 @@ async function syncWithGoogleSheets() {
         toSync.forEach(r => r.synced = true);
         localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
 
-        alert(`✅ Sincronización exitosa. ${toSync.length} registros enviados.`);
+        alert(`✅ Envío completado: ${toSync.length} registros procesados.\n\nPor favor, verifique su hoja de Excel en unos segundos.`);
         renderView(APP_STATE.currentView);
     } catch (error) {
         console.error('Error en sincronización:', error);
-        if (confirm('Error al conectar con Google Sheets. ¿Desea cambiar la URL del script?')) {
-            localStorage.removeItem('abc_sync_url');
-        }
+        alert('No se pudo conectar con el servidor. Verifique que el script esté publicado correctamente como "Cualquier persona".');
     } finally {
         if (btn) {
             btn.innerHTML = originalText;
