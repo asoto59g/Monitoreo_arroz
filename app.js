@@ -916,11 +916,11 @@ async function syncWithGoogleSheets() {
     try {
         console.log('Iniciando sincronización...', toSync.length, 'registros');
 
-        // Enviar registros en una sola solicitud
+        // Enviar registros como texto plano para evitar preflight CORS y asegurar que llegue el body
         await fetch(scriptURL, {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(toSync)
         });
 
