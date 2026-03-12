@@ -4,6 +4,7 @@
 
 const APP_STATE = {
     currentView: 'dashboard',
+    user: JSON.parse(localStorage.getItem('abc_user') || 'null'),
     collections: {
         fincas: JSON.parse(localStorage.getItem('abc_fincas') || '[]'),
         lotes: JSON.parse(localStorage.getItem('abc_lotes') || '[]'),
@@ -147,11 +148,27 @@ function initNavigation() {
 }
 
 function renderView(viewName) {
-    APP_STATE.currentView = viewName;
     const mainContent = document.getElementById('main-content');
+    const bottomNav = document.querySelector('.bottom-nav');
     if (!mainContent) return;
 
+    // Check for registration first
+    if (!APP_STATE.user && viewName !== 'registration') {
+        APP_STATE.currentView = 'registration';
+        mainContent.innerHTML = renderRegistration();
+        if (bottomNav) bottomNav.style.display = 'none';
+        if (window.lucide) window.lucide.createIcons();
+        return;
+    }
+
+    if (bottomNav) bottomNav.style.display = 'flex';
+    APP_STATE.currentView = viewName;
+
     switch (viewName) {
+        case 'registration':
+            mainContent.innerHTML = renderRegistration();
+            if (bottomNav) bottomNav.style.display = 'none';
+            break;
         case 'dashboard':
             mainContent.innerHTML = renderDashboard();
             break;
@@ -201,7 +218,7 @@ function renderDashboard() {
 
     return `
         <div class="card" style="margin-top: 1rem;">
-            <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Hola, Plaguero</h1>
+            <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Hola, ${APP_STATE.user?.name || 'Plaguero'}</h1>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Listo para el monitoreo de hoy.</p>
         </div>
         
@@ -297,6 +314,19 @@ function renderAdmin() {
                 <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.lotes.length} registrados</p>
             </div>
             <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem; border-color: rgba(255, 255, 255, 0.05);">
+            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                <div class="card-icon" style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"><i data-lucide="user"></i></div>
+                <div>
+                    <h4 style="font-size: 1rem;">${APP_STATE.user?.name || 'Usuario'}</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">${APP_STATE.user?.email || 'No registrado'}</p>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 0.6rem;" onclick="localStorage.removeItem('abc_user'); location.reload();">
+                CAMBIAR USUARIO / RE-REGISTRAR
+            </button>
         </div>
     `;
 }
@@ -627,7 +657,7 @@ function renderMonitorHeader() {
                 </div>
                 <div class="field-group">
                     <label>Plaguero</label>
-                    <input type="text" id="mon-plaguero" class="input-modern" placeholder="Nombre">
+                    <input type="text" id="mon-plaguero" class="input-modern" placeholder="Nombre" value="${APP_STATE.user?.name || ''}">
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -1214,4 +1244,56 @@ async function installPWA() {
 
     // Refresh UI
     renderView(APP_STATE.currentView);
+}
+
+function renderRegistration() {
+    return `
+        <div class="card" style="margin-top: 2rem; padding: 2rem;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="card-icon" style="margin-bottom: 1rem; transform: scale(1.5);"><i data-lucide="user-plus"></i></div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Registro de Dispositivo</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Complete sus datos para habilitar el uso de la aplicación.</p>
+            </div>
+
+            <div class="field-group">
+                <label>Nombre Completo</label>
+                <div style="position: relative;">
+                    <i data-lucide="user" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
+                    <input type="text" id="reg-name" class="input-modern" style="padding-left: 3rem;" placeholder="Ej: Mario Garcia">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Correo Electrónico</label>
+                <div style="position: relative;">
+                    <i data-lucide="mail" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
+                    <input type="email" id="reg-email" class="input-modern" style="padding-left: 3rem;" placeholder="usuario@ejemplo.com">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveRegistration()">
+                REGISTRAR DISPOSITIVO
+            </button>
+            <p style="font-size: 0.7rem; color: var(--text-secondary); text-align: center; margin-top: 1.5rem;">
+                La contraseña y validación de seguridad se habilitarán en una fase posterior.
+            </p>
+        </div>
+    `;
+}
+
+function saveRegistration() {
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+
+    if (!name || !email || !email.includes('@')) {
+        alert('Por favor, ingrese un nombre y correo electrónico válido.');
+        return;
+    }
+
+    const userData = { name, email, registeredAt: new Date().toISOString() };
+    APP_STATE.user = userData;
+    localStorage.setItem('abc_user', JSON.stringify(userData));
+
+    alert('¡Dispositivo registrado con éxito!');
+    renderView('dashboard');
 }
