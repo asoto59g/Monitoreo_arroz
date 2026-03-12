@@ -682,6 +682,13 @@ function saveHeaderAndNext() {
     const cicloId = document.getElementById('mon-ciclo').value;
     const fincaId = document.getElementById('mon-finca').value;
     const loteId = document.getElementById('mon-lote').value;
+    const edad = document.getElementById('mon-edad').value;
+    const plaguero = document.getElementById('mon-plaguero').value;
+
+    if (!cicloId || !fincaId || !loteId || !edad || !plaguero) {
+        alert('⚠️ Por favor complete todos los datos del encabezado (Ciclo, Finca, Lote, Edad y Plaguero) para continuar.');
+        return;
+    }
 
     const cicloName = APP_STATE.collections.ciclos.find(c => c.id === cicloId)?.nombre || '';
     const fincaName = APP_STATE.collections.fincas.find(f => f.id === fincaId)?.nombre || '';
@@ -694,10 +701,10 @@ function saveHeaderAndNext() {
         finca_name: fincaName,
         lote: loteId,
         lote_name: loteName,
-        edad: document.getElementById('mon-edad').value,
+        edad: edad,
         variedad: document.getElementById('mon-variedad').value,
         area: document.getElementById('mon-area').value,
-        plaguero: document.getElementById('mon-plaguero').value
+        plaguero: plaguero
     };
     renderView('monitor_pests');
 }
@@ -1092,14 +1099,22 @@ function renderMonitorGrowth() {
 }
 
 function saveAndFinish() {
-    // Collect growth data
-    const growth = {
-        poblacion: document.getElementById('mon-poblacion')?.value || 0,
-        altura: document.getElementById('mon-altura')?.value || 0,
-        agua: document.getElementById('mon-agua')?.value || 'N/A',
-        fenologia: document.getElementById('mon-fenologia')?.value || 'N/A'
+    const poblacion = document.getElementById('mon-poblacion')?.value;
+    const altura = document.getElementById('mon-altura')?.value;
+    const agua = document.getElementById('mon-agua')?.value;
+    const fenologia = document.getElementById('mon-fenologia')?.value;
+
+    if (!poblacion || !altura || !agua || !fenologia) {
+        alert('⚠️ Por favor complete todos los parámetros de crecimiento (Población, Altura, Agua y Fenología) antes de finalizar.');
+        return;
+    }
+
+    APP_STATE.monitoring.growth = {
+        poblacion,
+        altura,
+        agua,
+        fenologia
     };
-    APP_STATE.monitoring.growth = growth;
 
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     records.push({
