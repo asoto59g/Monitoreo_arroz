@@ -1166,10 +1166,11 @@ async function syncWithGoogleSheets() {
             body: JSON.stringify(toSync)
         });
 
-        toSync.forEach(r => r.synced = true);
-        localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
+        // Borrar localmente los registros que fueron sincronizados
+        const remainingRecords = records.filter(r => !toSync.some(ts => ts.id === r.id));
+        localStorage.setItem('abc_monitoring_records', JSON.stringify(remainingRecords));
 
-        alert(`✅ Envío completado: ${toSync.length} registros procesados.\n\nPor favor, verifique su hoja de Excel en unos segundos.`);
+        alert(`✅ Sincronización exitosa: ${toSync.length} registros enviados y eliminados del dispositivo.`);
         renderView(APP_STATE.currentView);
     } catch (error) {
         console.error('Error en sincronización:', error);
