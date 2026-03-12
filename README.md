@@ -1,3 +1,6 @@
+# Antes de empezar leer documentos Procedimiento Generico de Evaluacion y Resumen de Umbrales
+
+
 
 # Instalación y Uso de la Aplicación en Campo
 
