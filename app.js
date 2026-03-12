@@ -705,9 +705,32 @@ function saveHeaderAndNext() {
 function renderMonitorPests() {
     let pestsHtml = '';
 
+    // Mock icon mapping for visual alignment with mockup
+    const iconMap = {
+        spodoptera: 'bug',
+        sogata: 'leaf',
+        mocis: 'shrub',
+        oebalus: 'wind',
+        tibraca: 'shield',
+        minador: 'scissors',
+        acarospinki: 'microscope',
+        rupella: 'cloud-lightning'
+    };
+
+    // Icon Grid (selection overview)
+    const iconGridHtml = `
+        <div class="icon-grid">
+            ${PEST_DB.invertebrates.slice(0, 8).map(p => `
+                <div class="icon-box ${APP_STATE.monitoring.pests[p.id] > 0 ? 'active' : ''}" onclick="document.getElementById('pest-${p.id}').scrollIntoView({behavior: 'smooth'})">
+                    <i data-lucide="${iconMap[p.id] || 'bug'}"></i>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
     ['invertebrates', 'vertebrates', 'beneficials'].forEach(type => {
         const title = type === 'invertebrates' ? 'Plagas Invertebradas' : type === 'vertebrates' ? 'Plagas Vertebradas' : 'Benéficos';
-        pestsHtml += `<h3 style="margin: 1.5rem 0 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">${title.toUpperCase()}</h3>`;
+        pestsHtml += `<h3 style="margin: 1.5rem 0 0.5rem; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 1px;">${title.toUpperCase()}</h3>`;
 
         PEST_DB[type].forEach(pest => {
             const currentLevel = APP_STATE.monitoring.pests[pest.id] || 0;
@@ -716,26 +739,40 @@ function renderMonitorPests() {
             const isHigh = currentLevel > 2;
 
             pestsHtml += `
-                <div class="card" style="padding: 1rem; margin-bottom: 0.8rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                        <span style="font-weight: 600;">${pest.name}</span>
-                        <span id="label-${pest.id}" class="level-label level-${currentLevel}">${getLevelName(currentLevel)}</span>
+                <div id="pest-${pest.id}" class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${pest.name}</span>
+                        <div class="threshold-indicator" style="margin-bottom: 0;">
+                            <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
+                            <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
+                            <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
+                        </div>
                     </div>
 
-                    <div class="threshold-indicator">
-                        <div class="threshold-dot green ${isLow ? 'active' : ''}" title="Nivel 1: Bajo"></div>
-                        <div class="threshold-dot yellow ${isMed ? 'active' : ''}" title="Nivel 2: Medio"></div>
-                        <div class="threshold-dot red ${isHigh ? 'active' : ''}" title="Nivel 3: Alto"></div>
-                    </div>
-
-                    <div class="level-selector">
-                        <button class="level-btn ${currentLevel == 0 ? 'active' : ''}" data-level="0" onclick="setPestLevel('${pest.id}', 0)">0</button>
-                        <button class="level-btn ${currentLevel == 1 ? 'active' : ''}" data-level="1" onclick="setPestLevel('${pest.id}', 1)">1</button>
-                        <button class="level-btn ${currentLevel == 2 ? 'active' : ''}" data-level="2" onclick="setPestLevel('${pest.id}', 2)">2</button>
-                        <button class="level-btn ${currentLevel == 3 ? 'active' : ''}" data-level="3" onclick="setPestLevel('${pest.id}', 3)">3</button>
+                    <div class="level-selector-premium">
+                        <div class="level-card nulo ${currentLevel == 0 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 0)">
+                            <i data-lucide="ghost"></i>
+                            <span>NULO</span>
+                            <small>0%</small>
+                        </div>
+                        <div class="level-card bajo ${currentLevel == 1 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 1)">
+                            <i data-lucide="sprout"></i>
+                            <span>BAJO</span>
+                            <small>25%</small>
+                        </div>
+                        <div class="level-card medio ${currentLevel == 2 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 2)">
+                            <i data-lucide="hand"></i>
+                            <span>MEDIO</span>
+                            <small>50%</small>
+                        </div>
+                        <div class="level-card alto ${currentLevel == 3 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 3)">
+                            <i data-lucide="flame"></i>
+                            <span>ALTO</span>
+                            <small>75%+</small>
+                        </div>
                     </div>
                 </div>
-    `;
+            `;
         });
     });
 
@@ -749,6 +786,8 @@ function renderMonitorPests() {
                 <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
             </button>
         </div>
+        
+        ${iconGridHtml}
         
         <div class="monitoring-scroll">
             ${pestsHtml}
@@ -806,29 +845,52 @@ function renderMonitorDiseases() {
         const isHigh = isAdvancedScale ? currentLevel > 6 : currentLevel > 2;
 
         diseaseHtml += `
-            <div class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+            <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <i data-lucide="activity" style="width: 16px; height: 16px; color: var(--accent-emerald);"></i>
+                        <i data-lucide="test-tube-2" style="width: 20px; height: 20px; color: var(--accent-emerald);"></i>
                         <div>
-                            <span style="font-weight: 700; font-size: 1rem;">${d.name}</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${d.name}</span>
                             <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
                                 ${isAdvancedScale ? 'Escala 0-9 (IRRI)' : 'Escala 0-3'}
                             </div>
                         </div>
                     </div>
-                    <span id="label-dis-${d.id}" class="level-label level-${currentLevel}">${getLevelName(currentLevel, isAdvancedScale)}</span>
+                    <div class="threshold-indicator" style="margin-bottom: 0;">
+                        <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
+                        <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
+                        <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
+                    </div>
                 </div>
                 
-                <div class="threshold-indicator">
-                    <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
-                    <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
-                    <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
-                </div>
-                
-                <div class="${isAdvancedScale ? 'grid-0-9' : 'level-selector'}">
-                    ${buttons}
-                </div>
+                ${isAdvancedScale ? `
+                    <div class="grid-0-9">
+                        ${buttons}
+                    </div>
+                ` : `
+                    <div class="level-selector-premium">
+                        <div class="level-card nulo ${currentLevel == 0 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 0)">
+                            <i data-lucide="ghost"></i>
+                            <span>NULO</span>
+                            <small>0%</small>
+                        </div>
+                        <div class="level-card bajo ${currentLevel == 1 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 1)">
+                            <i data-lucide="sprout"></i>
+                            <span>BAJO</span>
+                            <small>25%</small>
+                        </div>
+                        <div class="level-card medio ${currentLevel == 2 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 2)">
+                            <i data-lucide="hand"></i>
+                            <span>MEDIO</span>
+                            <small>50%</small>
+                        </div>
+                        <div class="level-card alto ${currentLevel == 3 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 3)">
+                            <i data-lucide="flame"></i>
+                            <span>ALTO</span>
+                            <small>75%+</small>
+                        </div>
+                    </div>
+                `}
             </div>
         `;
     });
@@ -876,19 +938,19 @@ function renderMonitorWeeds() {
         for (let i = 7; i <= 9; i++) buttons += `<button class="level-btn btn-red ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel(${idx}, ${i})">${i}</button>`;
 
         return `
-            <div class="card" style="padding: 1rem; margin-bottom: 0.8rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <div class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div>
-                        <span style="font-weight: 600;">${w.name}</span>
-                        <div style="font-size: 0.7rem; color: var(--text-secondary);">Densidad (0-9)</div>
+                        <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${w.name}</span>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.2rem;">Densidad de Población (Escala 0-9)</div>
                     </div>
-                    <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; color: var(--accent-red);" onclick="removeWeed(${idx})">Remover</button>
+                    <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.65rem; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.2);" onclick="removeWeed(${idx})">ELIMINAR</button>
                 </div>
 
                 <div class="threshold-indicator">
-                    <div class="threshold-dot green ${isLow ? 'active' : ''}" title="Nivel 1: Bajo"></div>
-                    <div class="threshold-dot yellow ${isMed ? 'active' : ''}" title="Nivel 2: Medio"></div>
-                    <div class="threshold-dot red ${isHigh ? 'active' : ''}" title="Nivel 3: Alto"></div>
+                    <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
+                    <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
+                    <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
                 </div>
 
                 <div class="grid-0-9">
@@ -935,6 +997,36 @@ function renderMonitorWeeds() {
 function addWeedFromSelect(select) {
     if (!select.value) return;
     APP_STATE.monitoring.weeds.push({ name: select.value, level: 0 });
+    renderView('monitor_weeds');
+}
+
+function filterWeeds() {
+    const query = document.getElementById('weed-search').value.toLowerCase();
+    const resultsDiv = document.getElementById('weed-results');
+    if (!query) {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+
+    const matches = WEED_DB.filter(w => w.toLowerCase().includes(query)).slice(0, 5);
+    resultsDiv.innerHTML = matches.map(m => `
+        <div class="card" style="padding: 0.75rem 1rem; margin-bottom: 0.5rem; background: rgba(0,242,254,0.05); cursor: pointer;" onclick="addWeedFromResults('${m}')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>${m}</span>
+                <i data-lucide="plus" style="width: 16px; color: var(--accent-emerald);"></i>
+            </div>
+        </div>
+    `).join('');
+    if (window.lucide) window.lucide.createIcons();
+}
+
+function addWeedFromResults(name) {
+    if (APP_STATE.monitoring.weeds.some(w => w.name === name)) {
+        alert('Esta maleza ya ha sido agregada.');
+        return;
+    }
+    APP_STATE.monitoring.weeds.push({ name: name, level: 0 });
+    document.getElementById('weed-search').value = '';
     renderView('monitor_weeds');
 }
 
