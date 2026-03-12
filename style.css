@@ -325,27 +325,41 @@ body {
     transition: all 0.2s;
 }
 
-.level-btn.active[data-level="1"] {
-    background: var(--accent-green);
-    color: #000;
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
-}
-
-.level-btn.active[data-level="2"] {
-    background: var(--accent-yellow);
-    color: #000;
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
-}
-
+.level-btn.active.btn-green,
+.level-btn.active[data-level="1"],
+.level-btn.active[data-level="2"],
 .level-btn.active[data-level="3"] {
-    background: var(--accent-red);
-    color: #fff;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    background: var(--accent-green) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    border-color: var(--accent-green);
 }
 
+.level-btn.active.btn-yellow,
+.level-btn.active[data-level="4"],
+.level-btn.active[data-level="5"],
+.level-btn.active[data-level="6"] {
+    background: var(--accent-yellow) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    border-color: var(--accent-yellow);
+}
+
+.level-btn.active.btn-red,
+.level-btn.active[data-level="7"],
+.level-btn.active[data-level="8"],
+.level-btn.active[data-level="9"] {
+    background: var(--accent-red) !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    border-color: var(--accent-red);
+}
+
+.level-btn.active.level-btn-zero,
 .level-btn.active[data-level="0"] {
-    background: var(--text-secondary);
-    color: #000;
+    background: var(--text-secondary) !important;
+    color: #000 !important;
+    border-color: var(--text-secondary);
 }
 
 .threshold-indicator {
@@ -474,32 +488,32 @@ body {
     opacity: 0.5;
 }
 
-/* Active States for Level Cards */
+/* Active States for Level Cards (Solid/Lit up) */
 .level-card.active.nulo {
-    background: rgba(148, 163, 184, 0.15);
+    background: var(--text-secondary) !important;
     border-color: var(--text-secondary);
-    color: var(--text-primary);
+    color: #000 !important;
 }
 
 .level-card.active.bajo {
-    background: rgba(16, 185, 129, 0.15);
+    background: var(--accent-green) !important;
     border-color: var(--accent-green);
-    color: var(--accent-green);
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    color: #000 !important;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
 }
 
 .level-card.active.medio {
-    background: rgba(245, 158, 11, 0.15);
+    background: var(--accent-yellow) !important;
     border-color: var(--accent-yellow);
-    color: var(--accent-yellow);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+    color: #000 !important;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
 }
 
 .level-card.active.alto {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--accent-red) !important;
     border-color: var(--accent-red);
-    color: var(--accent-red);
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+    color: #fff !important;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
 }
 
 .level-card.active i {
