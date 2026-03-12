@@ -220,16 +220,28 @@ function renderDashboard() {
             </div>
         </div>
 
-        <button id="sync-btn" class="btn btn-secondary" style="width: 100%; border: 1px solid var(--accent-emerald); color: var(--accent-emerald); margin-top: 1rem;" onclick="syncWithGoogleSheets()">
             ☁️ SINCRONIZAR CON GOOGLE SHEETS
         </button>
 
-        ${APP_STATE.deferredPrompt ? `
-        <div class="card" style="margin-top: 1.5rem; text-align: center; border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05);">
-            <p style="font-size: 0.9rem; margin-bottom: 1rem;">📲 Instale la App en su pantalla de inicio para acceso rápido.</p>
-            <button class="btn btn-primary" style="width: 100%;" onclick="installPWA()">INSTALAR APP</button>
+        <div id="pwa-install-container" style="margin-top: 1.5rem;">
+            ${APP_STATE.deferredPrompt ? `
+                <div class="card" style="text-align: center; border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05);">
+                    <p style="font-size: 0.9rem; margin-bottom: 1rem;">📲 Instale la App en su pantalla de inicio para acceso rápido.</p>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="installPWA()">INSTALAR APP AHORA</button>
+                </div>
+            ` : `
+                <div class="card" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); padding: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;">💡 ¿Cómo instalar esta App?</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                        Si no ve el botón de instalar, puede hacerlo manualmente:
+                        <br><br>
+                        <strong>En Android (Chrome):</strong> Toque los 3 puntos (⋮) arriba a la derecha y seleccione <strong>"Instalar aplicación"</strong> o "Agregar a la pantalla de inicio".
+                        <br><br>
+                        <strong>En iPhone (Safari):</strong> Toque el botón compartir (󰐧) y seleccione <strong>"Agregar a la pantalla de inicio"</strong>.
+                    </p>
+                </div>
+            `}
         </div>
-        ` : ''}
     `;
 }
 
