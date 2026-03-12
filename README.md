@@ -7,7 +7,9 @@ https://asoto59g.github.io/Monitoreo_arroz/
 
 1. Abra la **URL de GitHub Pages** en el navegador de su teléfono.
 
-2. Según el dispositivo:
+   https://asoto59g.github.io/Monitoreo_arroz/
+
+3. Según el dispositivo:
 
 ### Android
 - Toque el menú (tres puntos).
@@ -27,7 +29,7 @@ https://asoto59g.github.io/Monitoreo_arroz/
 4. Presione **Sincronizar**.
 5. Pegue la **URL del Google Script** cuando se le solicite.
 
-   https://script.google.com/macros/s/AKfycbzleBdROD0XcjYXt1M13YgadNdUQUbQpEQhd-jAmsJZq-OfLJNnPgDZbl7qLIqN9Nbd/exec
+https://script.google.com/macros/s/AKfycbzleBdROD0XcjYXt1M13YgadNdUQUbQpEQhd-jAmsJZq-OfLJNnPgDZbl7qLIqN9Nbd/exec
 
 ---
 
