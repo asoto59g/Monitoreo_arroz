@@ -1,4 +1,4 @@
-# Antes de empezar leer documentos Procedimiento Generico de Evaluacion y Resumen de Umbrales
+# Antes de empezar leer documento Procedimiento Generico de Evaluacion
 
 
 
