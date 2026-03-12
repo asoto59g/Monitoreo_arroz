@@ -347,6 +347,7 @@ function addItem(collection) {
 function renderAdminLotes() {
     const list = APP_STATE.collections.lotes.map(l => {
         const ciclo = APP_STATE.collections.ciclos.find(c => c.id === l.cicloId)?.nombre || 'N/A';
+        const finca = APP_STATE.collections.fincas.find(f => f.id === l.fincaId)?.nombre || 'N/A';
         return `
             <div class="card" style="padding: 1rem; border-left: 4px solid var(--accent-emerald);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -354,6 +355,7 @@ function renderAdminLotes() {
                     <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; color: var(--accent-red);" onclick="deleteItem('lotes', '${l.id}')">Eliminar</button>
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                    <div>🏢 Finca: ${finca}</div>
                     <div>🔄 Ciclo: ${ciclo}</div>
                     <div>📍 Área: ${l.area || '-'}</div>
                     <div>🌾 Variedad: ${l.variedad || '-'}</div>
@@ -363,6 +365,7 @@ function renderAdminLotes() {
     }).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay lotes.</p>';
 
     const cicloOptions = APP_STATE.collections.ciclos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    const fincaOptions = APP_STATE.collections.fincas.map(f => `<option value="${f.id}">${f.nombre}</option>`).join('');
 
     return `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
@@ -370,6 +373,10 @@ function renderAdminLotes() {
             <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('admin')">ATRÁS</button>
         </div>
         <div class="card" style="background: var(--nav-bg);">
+            <div class="field-group">
+                <label>Finca Asociada</label>
+                <select id="new-lote-finca" class="input-modern">${fincaOptions}</select>
+            </div>
             <div class="field-group">
                 <label>Ciclo Asociado</label>
                 <select id="new-lote-ciclo" class="input-modern">${cicloOptions}</select>
@@ -397,15 +404,17 @@ function renderAdminLotes() {
 function addItemLote() {
     const nombreInput = document.getElementById('new-lote-nombre');
     const cicloInput = document.getElementById('new-lote-ciclo');
+    const fincaInput = document.getElementById('new-lote-finca');
     const areaInput = document.getElementById('new-lote-area');
     const variedadInput = document.getElementById('new-lote-variedad');
 
-    if (!nombreInput || !nombreInput.value || !cicloInput.value) return;
+    if (!nombreInput || !nombreInput.value || !cicloInput.value || !fincaInput.value) return;
 
     APP_STATE.collections.lotes.push({
         id: Date.now().toString(),
         nombre: nombreInput.value,
         cicloId: cicloInput.value,
+        fincaId: fincaInput.value,
         area: areaInput.value,
         variedad: variedadInput.value
     });
@@ -540,11 +549,11 @@ function renderMonitorHeader() {
         <div class="card">
             <div class="field-group">
                 <label>Ciclo Agrícola</label>
-                <select id="mon-ciclo" class="input-modern" onchange="updateLotesDropdown(this.value)">${ciclosOptions}</select>
+                <select id="mon-ciclo" class="input-modern" onchange="updateLotesDropdown()">${ciclosOptions}</select>
             </div>
             <div class="field-group">
                 <label>Finca</label>
-                <select id="mon-finca" class="input-modern">${fincasOptions}</select>
+                <select id="mon-finca" class="input-modern" onchange="updateLotesDropdown()">${fincasOptions}</select>
             </div>
             <div class="field-group">
                 <label>Lote</label>
@@ -574,18 +583,21 @@ function renderMonitorHeader() {
     `;
 }
 
-function updateLotesDropdown(cicloId) {
+function updateLotesDropdown() {
+    const cicloId = document.getElementById('mon-ciclo').value;
+    const fincaId = document.getElementById('mon-finca').value;
     const selector = document.getElementById('mon-lote');
+
     if (!selector) return;
 
-    if (!cicloId) {
-        selector.innerHTML = '<option value="">Seleccione Ciclo primero...</option>';
+    if (!cicloId || !fincaId) {
+        selector.innerHTML = '<option value="">Seleccione Ciclo y Finca...</option>';
         return;
     }
 
-    const lotes = APP_STATE.collections.lotes.filter(l => l.cicloId === cicloId);
+    const lotes = APP_STATE.collections.lotes.filter(l => l.cicloId === cicloId && l.fincaId === fincaId);
     if (lotes.length === 0) {
-        selector.innerHTML = '<option value="">No hay lotes en este ciclo</option>';
+        selector.innerHTML = '<option value="">No hay lotes coincidentes</option>';
     } else {
         selector.innerHTML = '<option value="">Seleccione Lote...</option>' + lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('');
     }
