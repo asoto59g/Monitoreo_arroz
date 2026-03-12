@@ -6,7 +6,6 @@ const APP_STATE = {
     currentView: 'dashboard',
     collections: {
         fincas: JSON.parse(localStorage.getItem('abc_fincas') || '[]'),
-        areas: JSON.parse(localStorage.getItem('abc_areas') || '[]'),
         lotes: JSON.parse(localStorage.getItem('abc_lotes') || '[]'),
         ciclos: JSON.parse(localStorage.getItem('abc_ciclos') || '[]'),
     },
@@ -14,11 +13,11 @@ const APP_STATE = {
         coords: null,
         header: {
             finca: null,
-            area: null,
             lote: null,
             ciclo: null,
             edad: 0,
             variedad: "",
+            area: "",
             plaguero: ""
         },
         pests: {},
@@ -35,7 +34,6 @@ const APP_STATE = {
 
 function saveData() {
     localStorage.setItem('abc_fincas', JSON.stringify(APP_STATE.collections.fincas));
-    localStorage.setItem('abc_areas', JSON.stringify(APP_STATE.collections.areas));
     localStorage.setItem('abc_lotes', JSON.stringify(APP_STATE.collections.lotes));
     localStorage.setItem('abc_ciclos', JSON.stringify(APP_STATE.collections.ciclos));
 }
@@ -127,6 +125,7 @@ function initNavigation() {
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             renderView(view);
+            window.scrollTo(0, 0);
         });
     });
 }
@@ -178,6 +177,10 @@ function renderView(viewName) {
 
 function renderDashboard() {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+    const pending = records.filter(r => !r.synced).length;
+    const synced = records.length - pending;
+    const percent = records.length > 0 ? Math.round((synced / records.length) * 100) : 0;
+
     return `
         <div class="card">
             <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Hola, Plaguero</h1>
@@ -191,12 +194,22 @@ function renderDashboard() {
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
             <div class="card" style="margin-bottom: 0;">
-                <p style="font-size: 0.8rem; color: var(--text-secondary);">REGISTROS HOY</p>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">TOTAL REGISTROS</p>
                 <p style="font-size: 1.5rem; font-weight: 600;">${records.length}</p>
             </div>
             <div class="card" style="margin-bottom: 0;">
                 <p style="font-size: 0.8rem; color: var(--text-secondary);">PENDIENTES</p>
-                <p style="font-size: 1.5rem; font-weight: 600;">${records.filter(r => !r.synced).length}</p>
+                <p style="font-size: 1.5rem; font-weight: 600; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                <span>Sincronización</span>
+                <span>${percent}% Completo</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                <div style="width: ${percent}%; height: 100%; background: var(--accent-emerald); box-shadow: 0 0 10px var(--accent-emerald);"></div>
             </div>
         </div>
 
@@ -220,10 +233,6 @@ function renderAdmin() {
         <div class="card" onclick="renderView('admin_fincas')">
             <h3>🏢 Fincas</h3>
             <p style="color: var(--text-secondary);">${APP_STATE.collections.fincas.length} registradas</p>
-        </div>
-        <div class="card" onclick="renderView('admin_areas')">
-            <h3>📍 Áreas</h3>
-            <p style="color: var(--text-secondary);">${APP_STATE.collections.areas.length} registradas</p>
         </div>
         <div class="card" onclick="renderView('admin_lotes')">
             <h3>🚜 Lotes</h3>
@@ -303,28 +312,7 @@ function addItem(collection) {
     renderView('admin_' + collection);
 }
 
-function renderAdminAreas() {
-    const list = APP_STATE.collections.areas.map(a => `
-        <div class="card" style="padding: 1rem; border-left: 4px solid var(--accent-emerald);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong>${a.nombre}</strong>
-                <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; color: var(--accent-red);" onclick="deleteItem('areas', '${a.id}')">Eliminar</button>
-            </div>
-        </div>
-    `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay áreas.</p>';
-
-    return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Áreas</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('admin')">ATRÁS</button>
-        </div>
-        <div class="card" style="background: var(--nav-bg);">
-            <input type="text" id="new-area" placeholder="Nombre de Área" class="input-modern">
-            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="addItemArea()">AGREGAR ÁREA</button>
-        </div>
-        <div class="list-container">${list}</div>
-    `;
-}
+// Areas removed as requested
 
 function renderAdminLotes() {
     const list = APP_STATE.collections.lotes.map(l => {
@@ -374,13 +362,7 @@ function renderAdminLotes() {
     `;
 }
 
-function addItemArea() {
-    const input = document.getElementById('new-area');
-    if (!input || !input.value) return;
-    APP_STATE.collections.areas.push({ id: Date.now().toString(), nombre: input.value });
-    saveData();
-    renderView('admin_areas');
-}
+// addItemArea removed
 
 function addItemLote() {
     const nombreInput = document.getElementById('new-lote-nombre');
@@ -408,12 +390,53 @@ function deleteItem(collection, id) {
 }
 
 function renderRecords() {
+    const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+
+    const list = records.slice().reverse().map((r, idx) => {
+        const date = new Date(r.timestamp);
+        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const originalIdx = records.length - 1 - idx;
+
+        return `
+            <div class="card" style="padding: 1rem; border-left: 4px solid ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'};">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 1rem;">${r.header?.lote_name || 'Lote Desconocido'}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">${dateStr}</div>
+                    </div>
+                    <span style="font-size: 0.7rem; padding: 0.2rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.2); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'};">
+                        ${r.synced ? 'Sincronizado' : 'Pendiente'}
+                    </span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                    <div>Ciclo: ${r.header?.ciclo_name || '-'}</div>
+                    <div>Plaguero: ${r.header?.plaguero || '-'}</div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" style="flex: 1; padding: 0.4rem; font-size: 0.75rem; color: var(--accent-red);" onclick="deleteRecord(${originalIdx})">ELIMINAR</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
     return `
-        <h2 style="margin-bottom: 1rem;">Registros Guardados</h2>
-        <div style="text-align: center; margin-top: 3rem;">
-            <p style="color: var(--text-secondary);">No hay registros locales para sincronizar.</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h2>Registros</h2>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} total</div>
+        </div>
+        
+        <div class="monitoring-scroll">
+            ${list || '<p style="text-align: center; color: var(--text-secondary); margin-top: 3rem;">No hay registros guardados.</p>'}
         </div>
     `;
+}
+
+function deleteRecord(index) {
+    if (!confirm('¿Está seguro de eliminar este registro local?')) return;
+    const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+    records.splice(index, 1);
+    localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
+    renderView('records');
 }
 
 function startMonitoring() {
@@ -527,10 +550,21 @@ function autofillLoteData(loteId) {
 }
 
 function saveHeaderAndNext() {
+    const cicloId = document.getElementById('mon-ciclo').value;
+    const fincaId = document.getElementById('mon-finca').value;
+    const loteId = document.getElementById('mon-lote').value;
+
+    const cicloName = APP_STATE.collections.ciclos.find(c => c.id === cicloId)?.nombre || '';
+    const fincaName = APP_STATE.collections.fincas.find(f => f.id === fincaId)?.nombre || '';
+    const loteName = APP_STATE.collections.lotes.find(l => l.id === loteId)?.nombre || '';
+
     APP_STATE.monitoring.header = {
-        ciclo: document.getElementById('mon-ciclo').value,
-        finca: document.getElementById('mon-finca').value,
-        lote: document.getElementById('mon-lote').value,
+        ciclo: cicloId,
+        ciclo_name: cicloName,
+        finca: fincaId,
+        finca_name: fincaName,
+        lote: loteId,
+        lote_name: loteName,
         edad: document.getElementById('mon-edad').value,
         variedad: document.getElementById('mon-variedad').value,
         area: document.getElementById('mon-area').value,
@@ -833,6 +867,7 @@ function saveAndFinish() {
     };
 
     alert('¡Registro guardado exitosamente!');
+    window.scrollTo(0, 0);
     renderView('dashboard');
 }
 
