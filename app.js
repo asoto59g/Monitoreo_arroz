@@ -149,6 +149,7 @@ function initNavigation() {
 function renderView(viewName) {
     APP_STATE.currentView = viewName;
     const mainContent = document.getElementById('main-content');
+    if (!mainContent) return;
 
     switch (viewName) {
         case 'dashboard':
@@ -162,6 +163,9 @@ function renderView(viewName) {
             break;
         case 'admin_fincas':
             mainContent.innerHTML = renderAdminFincas();
+            break;
+        case 'admin_lotes':
+            mainContent.innerHTML = renderAdminLotes();
             break;
         case 'records':
             mainContent.innerHTML = renderRecords();
@@ -178,17 +182,16 @@ function renderView(viewName) {
         case 'monitor_weeds':
             mainContent.innerHTML = renderMonitorWeeds();
             break;
-        case 'admin_areas':
-            mainContent.innerHTML = renderAdminAreas();
-            break;
-        case 'admin_lotes':
-            mainContent.innerHTML = renderAdminLotes();
-            break;
         case 'monitor_growth':
             mainContent.innerHTML = renderMonitorGrowth();
             break;
         default:
             mainContent.innerHTML = `<div class="card"><h2>${viewName}</h2><p>En desarrollo...</p></div>`;
+    }
+
+    // Initialize Lucide icons after rendering
+    if (window.lucide) {
+        window.lucide.createIcons();
     }
 }
 
@@ -220,12 +223,16 @@ function renderDashboard() {
 
         <div class="card" style="padding: 1.2rem; border-color: ${pending > 0 ? 'var(--accent-emerald)' : 'var(--glass-border)'};">
             <button id="sync-btn" class="btn btn-primary" 
-                    style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none;" 
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" 
                     onclick="syncWithGoogleSheets()">
-                ☁️ SINCRONIZAR AHORA
+                <i data-lucide="cloud-upload" style="width: 20px; height: 20px;"></i>
+                SINCRONIZAR AHORA
             </button>
             <div style="text-align: center; margin-top: 0.8rem;">
-                <a href="#" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: underline;" onclick="localStorage.removeItem('abc_sync_url'); alert('URL borrada. Presione Sincronizar para pegar la nueva.'); renderView('dashboard'); return false;">🔧 Configurar URL de Script</a>
+                <a href="#" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: underline; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="localStorage.removeItem('abc_sync_url'); alert('URL borrada. Presione Sincronizar para pegar la nueva.'); renderView('dashboard'); return false;">
+                    <i data-lucide="pincode-locked" style="width: 12px; height: 12px;"></i>
+                    Configurar URL de Script
+                </a>
             </div>
         </div>
 
@@ -251,152 +258,175 @@ function renderDashboard() {
 
 function renderAdmin() {
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Administración</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('dashboard')">VOLVER</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="settings"></i></div>
+                <h2 style="font-size: 1.25rem;">Administración</h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('dashboard')">VOLVER</button>
         </div>
         
-        <div class="card" onclick="renderView('admin_ciclos')">
-            <h3>🔄 Ciclos</h3>
-            <p style="color: var(--text-secondary);">${APP_STATE.collections.ciclos.length} registrados</p>
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem;" onclick="renderView('admin_ciclos')">
+            <div class="card-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-emerald);">
+                <i data-lucide="refresh-cw"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Ciclos</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.ciclos.length} registrados</p>
+            </div>
+            <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
         </div>
-        <div class="card" onclick="renderView('admin_fincas')">
-            <h3>🏢 Fincas</h3>
-            <p style="color: var(--text-secondary);">${APP_STATE.collections.fincas.length} registradas</p>
+        
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem;" onclick="renderView('admin_fincas')">
+            <div class="card-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-emerald);">
+                <i data-lucide="building-2"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Fincas</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.fincas.length} registradas</p>
+            </div>
+            <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
         </div>
-        <div class="card" onclick="renderView('admin_lotes')">
-            <h3>🚜 Lotes</h3>
-            <p style="color: var(--text-secondary);">${APP_STATE.collections.lotes.length} registrados</p>
+        
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem;" onclick="renderView('admin_lotes')">
+            <div class="card-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-emerald);">
+                <i data-lucide="grid-3x3"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Lotes</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.lotes.length} registrados</p>
+            </div>
+            <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
         </div>
     `;
 }
 
 function renderAdminCiclos() {
-    const list = APP_STATE.collections.ciclos.map(c => `
-        <div class="card" style="padding: 1rem; border-left: 4px solid var(--accent-emerald);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong>${c.nombre}</strong>
-                <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; color: var(--accent-red);" onclick="deleteItem('ciclos', '${c.id}')">Eliminar</button>
-            </div>
-        </div>
-    `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay ciclos.</p>';
-
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Ciclos Agricolas</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('admin')">ATRÁS</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="refresh-cw"></i></div>
+                <h2 style="font-size: 1.25rem;">Ciclos</h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('admin')">VOLVER</button>
         </div>
         
-        <div class="card" style="background: var(--nav-bg);">
-            <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Ej: Verano 2026, Invierno 2025</label>
-            <input type="text" id="new-ciclo" placeholder="Nombre de Ciclo" class="input-modern">
-            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="addItem('ciclos')">AGREGAR CICLO</button>
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Agregar Nuevo Ciclo</h3>
+            <div class="field-group">
+                <input type="text" id="new-ciclo-nombre" class="input-modern" placeholder="Ej: Verano 2026">
+            </div>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="addItemCiclo()">
+                <i data-lucide="plus" style="width: 18px; height: 18px;"></i> AÑADIR CICLO
+            </button>
         </div>
-        
-        <div class="list-container">${list}</div>
-    `;
+
+        <div class="list-container">
+            ${APP_STATE.collections.ciclos.map(c => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+                    <span style="font-weight: 600;">${c.nombre}</span>
+                    <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('ciclos', '${c.id}', 'admin_ciclos')">
+                        <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </div>
+            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay ciclos.</p>'}
+        </div>
+`;
 }
 
 function renderAdminFincas() {
-    const list = APP_STATE.collections.fincas.map(f => `
-        <div class="card" style="padding: 1rem; border-left: 4px solid var(--accent-emerald);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong>${f.nombre}</strong>
-                <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; color: var(--accent-red);" onclick="deleteItem('fincas', '${f.id}')">Eliminar</button>
-            </div>
-        </div>
-    `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay fincas.</p>';
-
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Fincas</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('admin')">ATRÁS</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="building-2"></i></div>
+                <h2 style="font-size: 1.25rem;">Fincas</h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('admin')">VOLVER</button>
         </div>
         
-        <div class="card" style="background: var(--nav-bg);">
-            <input type="text" id="new-finca" placeholder="Nombre de Finca" class="input-modern">
-            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="addItem('fincas')">AGREGAR FINCA</button>
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Agregar Nueva Finca</h3>
+            <div class="field-group">
+                <input type="text" id="new-finca-nombre" class="input-modern" placeholder="Ej: Finca La Esperanza">
+            </div>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="addItemFinca()">
+                <i data-lucide="plus" style="width: 18px; height: 18px;"></i> AÑADIR FINCA
+            </button>
         </div>
-        
-        <div class="list-container">${list}</div>
-    `;
+
+        <div class="list-container">
+            ${APP_STATE.collections.fincas.map(f => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+                    <span style="font-weight: 600;">${f.nombre}</span>
+                    <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('fincas', '${f.id}', 'admin_fincas')">
+                        <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </div>
+            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay fincas.</p>'}
+        </div>
+`;
 }
-
-function addItem(collection) {
-    const selector = {
-        'fincas': 'new-finca',
-        'ciclos': 'new-ciclo',
-        'areas': 'new-area',
-        'lotes': 'new-lote'
-    }[collection];
-
-    const input = document.getElementById(selector);
-    if (!input || !input.value) return;
-
-    APP_STATE.collections[collection].push({
-        id: Date.now().toString(),
-        nombre: input.value
-    });
-
-    saveData();
-    renderView('admin_' + collection);
-}
-
-// Areas removed as requested
 
 function renderAdminLotes() {
-    const list = APP_STATE.collections.lotes.map(l => {
-        const ciclo = APP_STATE.collections.ciclos.find(c => c.id === l.cicloId)?.nombre || 'N/A';
-        const finca = APP_STATE.collections.fincas.find(f => f.id === l.fincaId)?.nombre || 'N/A';
-        return `
-            <div class="card" style="padding: 1rem; border-left: 4px solid var(--accent-emerald);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <strong>${l.nombre}</strong>
-                    <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; color: var(--accent-red);" onclick="deleteItem('lotes', '${l.id}')">Eliminar</button>
-                </div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                    <div>🏢 Finca: ${finca}</div>
-                    <div>🔄 Ciclo: ${ciclo}</div>
-                    <div>📍 Área: ${l.area || '-'}</div>
-                    <div>🌾 Variedad: ${l.variedad || '-'}</div>
-                </div>
-            </div>
-        `;
-    }).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay lotes.</p>';
-
     const cicloOptions = APP_STATE.collections.ciclos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
     const fincaOptions = APP_STATE.collections.fincas.map(f => `<option value="${f.id}">${f.nombre}</option>`).join('');
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Lotes</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('admin')">ATRÁS</button>
-        </div>
-        <div class="card" style="background: var(--nav-bg);">
-            <div class="field-group">
-                <label>Finca Asociada</label>
-                <select id="new-lote-finca" class="input-modern">${fincaOptions}</select>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="grid-3x3"></i></div>
+                <h2 style="font-size: 1.25rem;">Lotes</h2>
             </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('admin')">VOLVER</button>
+        </div>
+        
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Nuevo Lote</h3>
             <div class="field-group">
-                <label>Ciclo Asociado</label>
+                <label>Ciclo Agrícola</label>
                 <select id="new-lote-ciclo" class="input-modern">${cicloOptions}</select>
             </div>
             <div class="field-group">
+                <label>Finca</label>
+                <select id="new-lote-finca" class="input-modern">${fincaOptions}</select>
+            </div>
+            <div class="field-group">
                 <label>Nombre del Lote</label>
-                <input type="text" id="new-lote-nombre" placeholder="Ej: Lote 01" class="input-modern">
+                <input type="text" id="new-lote-nombre" class="input-modern" placeholder="Ej: Lote A1">
             </div>
-            <div class="field-group">
-                <label>Área</label>
-                <input type="text" id="new-lote-area" placeholder="Ej: 10 Ha" class="input-modern">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field-group">
+                    <label>Variedad</label>
+                    <input type="text" id="new-lote-variedad" class="input-modern" placeholder="Ej: Palmar 18">
+                </div>
+                <div class="field-group">
+                    <label>Área (Ha)</label>
+                    <input type="number" id="new-lote-area" class="input-modern" placeholder="0.0">
+                </div>
             </div>
-            <div class="field-group">
-                <label>Variedad</label>
-                <input type="text" id="new-lote-variedad" placeholder="Ej: Palmar 18" class="input-modern">
-            </div>
-            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="addItemLote()">AGREGAR LOTE</button>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="addItemLote()">
+                <i data-lucide="plus" style="width: 18px; height: 18px;"></i> AÑADIR LOTE
+            </button>
         </div>
-        <div class="list-container">${list}</div>
-    `;
+
+        <div class="list-container">
+            ${APP_STATE.collections.lotes.map(l => {
+        const ciclo = APP_STATE.collections.ciclos.find(c => c.id === l.cicloId)?.nombre || 'N/A';
+        const finca = APP_STATE.collections.fincas.find(f => f.id === l.fincaId)?.nombre || 'N/A';
+        return `
+                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+                        <div>
+                            <span style="font-weight: 700; display: block;">${l.nombre}</span>
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">${ciclo} • ${finca}</span>
+                        </div>
+                        <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('lotes', '${l.id}', 'admin_lotes')">
+                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+                `;
+    }).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay lotes.</p>'}
+        </div>
+`;
 }
 
 // addItemArea removed
@@ -442,14 +472,22 @@ function renderRecords() {
         const coords = r.coords || {};
 
         return `
-            <div class="card" style="padding: 1rem; border-left: 4px solid ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'};">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-emerald);">${h.lote_name || 'Lote Descon.'}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-primary);">${dateStr} - ${timeStr}</div>
+            <div class="card" style="padding: 1.25rem; border-left: 5px solid ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; animation: slideUp 0.4s ease-out backwards; animation-delay: ${idx * 0.05}s;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 0.75rem;">
+                        <div class="card-icon" style="margin-top: 0.2rem;">
+                            <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); letter-spacing: -0.5px;">${h.lote_name || 'Lote Descon.'}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;">
+                                <i data-lucide="calendar" style="width: 12px; height: 12px;"></i>
+                                ${dateStr} • ${timeStr}
+                            </div>
+                        </div>
                     </div>
-                    <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.1); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; font-weight: 600;">
-                        ${r.synced ? 'SINC' : 'PEND'}
+                    <span style="font-size: 0.65rem; padding: 0.25rem 0.6rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; font-weight: 800; border: 1px solid currentColor;">
+                        ${r.synced ? 'SINC:' : 'PEND:'}
                     </span>
                 </div>
                 
@@ -465,29 +503,37 @@ function renderRecords() {
                 </div>
 
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; color: var(--accent-red); border-color: rgba(248,113,113,0.3);" onclick="deleteRecord(${originalIdx})">ELIMINAR REGISTRO LOCAL</button>
+                    <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.75rem; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; gap: 0.3rem;" onclick="deleteRecord(${originalIdx})">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> ELIMINAR
+                    </button>
                 </div>
             </div>
         `;
     }).join('');
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Historial</h2>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} registros</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="history"></i></div>
+                <h2 style="font-size: 1.5rem; letter-spacing: -0.5px;">Registros</h2>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} TOTAL</div>
         </div>
 
-        ${pending > 0 ? `
-        <div class="card" style="border: 1px solid var(--accent-yellow); padding: 1rem; text-align: center; margin-bottom: 1.5rem;">
-            <p style="font-size: 0.85rem; color: var(--accent-yellow); margin-bottom: 0.8rem;">⚠️ Tiene ${pending} registros sin respaldar</p>
-            <button id="sync-btn-all" class="btn btn-primary" style="width: 100%;" onclick="syncWithGoogleSheets()">SINCRONIZAR TODO AHORA</button>
+    ${pending > 0 ? `
+        <div class="card" style="border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05); padding: 1.25rem; text-align: center; margin-bottom: 1.5rem; animation: slideUp 0.4s ease-out;">
+            <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 1rem; font-weight: 500;">Tiene <span style="color: var(--accent-emerald); font-weight: 700;">${pending}</span> registros pendientes</p>
+            <button id="sync-btn-all" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="syncWithGoogleSheets()">
+                <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> SINCRONIZAR TODO
+            </button>
         </div>
-        ` : ''}
-        
-        <div class="monitoring-scroll">
-            ${list || '<p style="text-align: center; color: var(--text-secondary); margin-top: 3rem;">No hay registros locales.</p>'}
-        </div>
-    `;
+        ` : ''
+        }
+
+<div class="monitoring-scroll">
+    ${list || '<div style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);"> <i data-lucide="inbox" style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 1rem;"></i><p>No hay registros locales.</p></div>'}
+</div>
+`;
 }
 
 function deleteRecord(index) {
@@ -514,7 +560,7 @@ function getGPSCoordinates() {
             };
             const gpsLabel = document.getElementById('gps-status');
             if (gpsLabel) {
-                gpsLabel.innerHTML = `📡 Lat: ${position.coords.latitude.toFixed(5)}, Lon: ${position.coords.longitude.toFixed(5)}`;
+                gpsLabel.innerHTML = `📡 Lat: ${position.coords.latitude.toFixed(5)}, Lon: ${position.coords.longitude.toFixed(5)} `;
                 gpsLabel.style.color = 'var(--accent-emerald)';
             }
         }, (error) => {
@@ -537,50 +583,71 @@ function renderMonitorHeader() {
     const ciclosOptions = `<option value="">Seleccione Ciclo...</option>` + APP_STATE.collections.ciclos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Nuevo Monitoreo</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('dashboard')">CANCELAR</button>
-        </div>
-        
-        <div id="gps-status" style="text-align: center; font-size: 0.8rem; margin-bottom: 1rem; color: var(--text-secondary);">
-            ⌛ Capturando ubicación...
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="file-text"></i></div>
+                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Encabezado</h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('dashboard')">
+                <i data-lucide="x" style="width: 14px; height: 14px;"></i> CANCELAR
+            </button>
         </div>
         
         <div class="card">
             <div class="field-group">
                 <label>Ciclo Agrícola</label>
-                <select id="mon-ciclo" class="input-modern" onchange="updateLotesDropdown()">${ciclosOptions}</select>
+                <div style="position: relative;">
+                    <i data-lucide="refresh-cw" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
+                    <select id="mon-ciclo" class="input-modern" style="padding-left: 3rem;" onchange="updateLotesDropdown()">${ciclosOptions}</select>
+                </div>
             </div>
             <div class="field-group">
                 <label>Finca</label>
-                <select id="mon-finca" class="input-modern" onchange="updateLotesDropdown()">${fincasOptions}</select>
+                <div style="position: relative;">
+                    <i data-lucide="building-2" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
+                    <select id="mon-finca" class="input-modern" style="padding-left: 3rem;" onchange="updateLotesDropdown()">${fincasOptions}</select>
+                </div>
             </div>
             <div class="field-group">
-                <label>Lote</label>
-                <select id="mon-lote" class="input-modern" onchange="autofillLoteData(this.value)">
-                    <option value="">Seleccione Ciclo primero...</option>
-                </select>
+                <label>Lote (Parcela)</label>
+                <div style="position: relative;">
+                    <i data-lucide="grid-3x3" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
+                    <select id="mon-lote" class="input-modern" style="padding-left: 3rem;" onchange="autofillLoteData(this.value)">
+                        <option value="">Seleccione Ciclo y Finca primero...</option>
+                    </select>
+                </div>
             </div>
-            <div class="field-group">
-                <label>Edad (Días)</label>
-                <input type="number" id="mon-edad" class="input-modern" placeholder="0">
-            </div>
-            <div class="field-group">
-                <label>Variedad</label>
-                <input type="text" id="mon-variedad" class="input-modern" placeholder="Autocompletado...">
-            </div>
-            <div class="field-group" style="display:none;">
-                <label>Área</label>
-                <input type="text" id="mon-area" class="input-modern">
-            </div>
-            <div class="field-group">
-                <label>Plaguero</label>
-                <input type="text" id="mon-plaguero" class="input-modern" placeholder="Su nombre">
-            </div>
-            
-            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveHeaderAndNext()">CONTINUAR A PLAGAS</button>
         </div>
-    `;
+
+        <div class="card">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field-group">
+                    <label>Edad (DDS)</label>
+                    <input type="number" id="mon-edad" class="input-modern" placeholder="Días">
+                </div>
+                <div class="field-group">
+                    <label>Plaguero</label>
+                    <input type="text" id="mon-plaguero" class="input-modern" placeholder="Nombre">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field-group">
+                    <label>Variedad</label>
+                    <input type="text" id="mon-variedad" class="input-modern" readonly style="opacity: 0.7;">
+                </div>
+                <div class="field-group">
+                    <label>Área (Ha)</label>
+                    <input type="text" id="mon-area" class="input-modern" readonly style="opacity: 0.7;">
+                </div>
+            </div>
+        </div>
+        
+        <div class="sticky-footer">
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="saveHeaderAndNext()">
+                EMPEZAR MONITOREO <i data-lucide="chevron-right" style="width: 18px; height: 18px;"></i>
+            </button>
+        </div>
+`;
 }
 
 function updateLotesDropdown() {
@@ -668,14 +735,19 @@ function renderMonitorPests() {
                         <button class="level-btn ${currentLevel == 3 ? 'active' : ''}" data-level="3" onclick="setPestLevel('${pest.id}', 3)">3</button>
                     </div>
                 </div>
-            `;
+    `;
         });
     });
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Plagas 1/5</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('monitor_header')">ATRÁS</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="bug"></i></div>
+                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Plagas <span style="color: var(--text-secondary); font-size: 0.9rem;">1/5</span></h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_header')">
+                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            </button>
         </div>
         
         <div class="monitoring-scroll">
@@ -683,9 +755,11 @@ function renderMonitorPests() {
         </div>
         
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%;" onclick="renderView('monitor_diseases')">CONTINUAR A ENFERMEDADES</button>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="renderView('monitor_diseases')">
+                CONTINUAR <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            </button>
         </div>
-    `;
+`;
 }
 
 function setPestLevel(id, level) {
@@ -718,13 +792,9 @@ function renderMonitorDiseases() {
 
         let buttons = '';
         if (isAdvancedScale) {
-            // Button 0 (Special)
             buttons += `<button class="level-btn level-btn-zero ${currentLevel == 0 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 0)">0</button>`;
-            // Buttons 1-3 (Green)
             for (let i = 1; i <= 3; i++) buttons += `<button class="level-btn btn-green ${currentLevel == i ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', ${i})">${i}</button>`;
-            // Buttons 4-6 (Yellow)
             for (let i = 4; i <= 6; i++) buttons += `<button class="level-btn btn-yellow ${currentLevel == i ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', ${i})">${i}</button>`;
-            // Buttons 7-9 (Red)
             for (let i = 7; i <= 9; i++) buttons += `<button class="level-btn btn-red ${currentLevel == i ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', ${i})">${i}</button>`;
         } else {
             for (let i = 0; i <= scale; i++) {
@@ -736,21 +806,26 @@ function renderMonitorDiseases() {
         const isHigh = isAdvancedScale ? currentLevel > 6 : currentLevel > 2;
 
         diseaseHtml += `
-            <div class="card" style="padding: 1rem; margin-bottom: 0.8rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                    <div>
-                        <span style="font-weight: 600;">${d.name}</span>
-                        <div style="font-size: 0.7rem; color: var(--text-secondary);">${isAdvancedScale ? 'Escala 0-9 (IRRI)' : 'Escala 0-3'}</div>
+            <div class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <i data-lucide="activity" style="width: 16px; height: 16px; color: var(--accent-emerald);"></i>
+                        <div>
+                            <span style="font-weight: 700; font-size: 1rem;">${d.name}</span>
+                            <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                                ${isAdvancedScale ? 'Escala 0-9 (IRRI)' : 'Escala 0-3'}
+                            </div>
+                        </div>
                     </div>
                     <span id="label-dis-${d.id}" class="level-label level-${currentLevel}">${getLevelName(currentLevel, isAdvancedScale)}</span>
                 </div>
                 
                 <div class="threshold-indicator">
-                    <div class="threshold-dot green ${isLow ? 'active' : ''}" title="Nivel 1: Bajo"></div>
-                    <div class="threshold-dot yellow ${isMed ? 'active' : ''}" title="Nivel 2: Medio"></div>
-                    <div class="threshold-dot red ${isHigh ? 'active' : ''}" title="Nivel 3: Alto"></div>
+                    <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
+                    <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
+                    <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
                 </div>
-
+                
                 <div class="${isAdvancedScale ? 'grid-0-9' : 'level-selector'}">
                     ${buttons}
                 </div>
@@ -759,13 +834,24 @@ function renderMonitorDiseases() {
     });
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Enfermedades 2/5</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('monitor_pests')">ATRÁS</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="thermometer-sun"></i></div>
+                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Enfermedades <span style="color: var(--text-secondary); font-size: 0.9rem;">2/5</span></h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_pests')">
+                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            </button>
         </div>
-        <div class="monitoring-scroll">${diseaseHtml}</div>
+        
+        <div class="monitoring-scroll">
+            ${diseaseHtml}
+        </div>
+        
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%;" onclick="renderView('monitor_weeds')">CONTINUAR A MALEZAS</button>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="renderView('monitor_weeds')">
+                CONTINUAR <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            </button>
         </div>
     `;
 }
@@ -776,16 +862,14 @@ function setDiseaseLevel(id, level) {
 }
 
 function renderMonitorWeeds() {
-    const activeWeeds = APP_STATE.monitoring.weeds.map((w, idx) => {
+    const selectedHtml = APP_STATE.monitoring.weeds.map((w, idx) => {
         const currentLevel = w.level || 0;
 
-        // Use the same threshold logic as 0-9 diseases
         const isLow = currentLevel > 0;
         const isMed = currentLevel > 3;
         const isHigh = currentLevel > 6;
 
         let buttons = '';
-        // Special 0-9 grid for weeds
         buttons += `<button class="level-btn level-btn-zero ${currentLevel == 0 ? 'active' : ''}" onclick="setWeedLevel(${idx}, 0)">0</button>`;
         for (let i = 1; i <= 3; i++) buttons += `<button class="level-btn btn-green ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel(${idx}, ${i})">${i}</button>`;
         for (let i = 4; i <= 6; i++) buttons += `<button class="level-btn btn-yellow ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel(${idx}, ${i})">${i}</button>`;
@@ -815,25 +899,35 @@ function renderMonitorWeeds() {
     }).join('');
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Malezas 3/5</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('monitor_diseases')">ATRÁS</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="sprout"></i></div>
+                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Malezas <span style="color: var(--text-secondary); font-size: 0.9rem;">3/5</span></h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_diseases')">
+                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            </button>
+        </div>
+        
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="field-group">
+                <label>Buscar Maleza</label>
+                <div style="position: relative;">
+                    <i data-lucide="search" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
+                    <input type="text" id="weed-search" class="input-modern" style="padding-left: 3rem;" placeholder="Escriba nombre..." oninput="filterWeeds()">
+                </div>
+            </div>
+            <div id="weed-results" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;"></div>
         </div>
 
-        <div class="card" style="background: var(--nav-bg);">
-            <label style="font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">Agregar Maleza</label>
-            <select id="weed-search" class="input-modern" onchange="addWeedFromSelect(this)">
-                <option value="">Seleccione para agregar...</option>
-                ${WEED_DB.map(w => `<option value="${w}">${w}</option>`).join('')}
-            </select>
+        <div id="selected-weeds-list" class="monitoring-scroll">
+            ${selectedHtml}
         </div>
-
-        <div class="monitoring-scroll">
-            ${activeWeeds || '<p style="text-align: center; color: var(--text-secondary); margin-top: 2rem;">No ha agregado malezas aún.</p>'}
-        </div>
-
+        
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%;" onclick="renderView('monitor_growth')">CONTINUAR A CRECIMIENTO</button>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="renderView('monitor_growth')">
+                CONTINUAR <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            </button>
         </div>
     `;
 }
@@ -856,60 +950,64 @@ function setWeedLevel(index, level) {
 
 function renderMonitorGrowth() {
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2>Manejo 4/5</h2>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="renderView('monitor_weeds')">ATRÁS</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="card-icon"><i data-lucide="line-chart"></i></div>
+                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Crecimiento <span style="color: var(--text-secondary); font-size: 0.9rem;">4/5</span></h2>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_weeds')">
+                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            </button>
         </div>
-
-        <div class="card">
-            <h3 style="margin-bottom: 1rem; color: var(--accent-emerald);">Crecimiento y Riego</h3>
-            
-            <div class="field-group">
-                <label>Población (Plantas/m²)</label>
-                <input type="number" id="mon-poblacion" class="input-modern" value="${APP_STATE.monitoring.growth.poblacion}">
-            </div>
-            
-            <div class="field-group">
-                <label>Altura Planta (cm)</label>
-                <input type="number" id="mon-altura" class="input-modern" value="${APP_STATE.monitoring.growth.altura}">
-            </div>
-            
-            <div class="field-group">
-                <label>Lámina de Agua (cm)</label>
-                <input type="number" id="mon-lamina" class="input-modern" value="${APP_STATE.monitoring.growth.lamina}">
-            </div>
-            
-            <div class="field-group">
-                <label>Estado Fenológico</label>
-                <select id="mon-fenologia" class="input-modern">
-                    <option value="0">0 - Nulo</option>
-                    <option value="1">1 - Germinación (S3)</option>
-                    <option value="2">2 - Plántula (V3)</option>
-                    <option value="3">3 - Inicio Macollamiento (V4)</option>
-                    <option value="4">4 - Elongación tallo (V5-V9)</option>
-                    <option value="5">5 - Inicio primordio [V9 (VF-4) o R0]</option>
-                    <option value="6">6 - Floración (R3)</option>
-                    <option value="7">7 - Grano en leche (R6)</option>
-                    <option value="8">8 - Grano en masa (R7-R8)</option>
-                    <option value="9">9 - Maduración (R9)</option>
-                    <option value="10">10 - Cosecha</option>
-                </select>
+        
+        <div class="monitoring-scroll">
+            <div class="card">
+                <div class="field-group">
+                    <label>Población (plantas/m2)</label>
+                    <input type="number" id="mon-poblacion" class="input-modern" value="${APP_STATE.monitoring.growth.poblacion || ''}" placeholder="Ej: 250">
+                </div>
+                <div class="field-group">
+                    <label>Altura Planta (cm)</label>
+                    <input type="number" id="mon-altura" class="input-modern" value="${APP_STATE.monitoring.growth.altura || ''}" placeholder="Ej: 45">
+                </div>
+                <div class="field-group">
+                    <label>Lámina de Agua</label>
+                    <select id="mon-agua" class="input-modern">
+                        <option value="Seco" ${APP_STATE.monitoring.growth.agua === 'Seco' ? 'selected' : ''}>Seco</option>
+                        <option value="Saturado" ${APP_STATE.monitoring.growth.agua === 'Saturado' ? 'selected' : ''}>Saturado</option>
+                        <option value="Lámina" ${APP_STATE.monitoring.growth.agua === 'Lámina' ? 'selected' : ''}>Lámina</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Estado Fenológico</label>
+                    <select id="mon-fenologia" class="input-modern">
+                        <option value="Vegetativo" ${APP_STATE.monitoring.growth.fenologia === 'Vegetativo' ? 'selected' : ''}>Vegetativo</option>
+                        <option value="Reproductivo" ${APP_STATE.monitoring.growth.fenologia === 'Reproductivo' ? 'selected' : ''}>Reproductivo</option>
+                        <option value="Maduración" ${APP_STATE.monitoring.growth.fenologia === 'Maduración' ? 'selected' : ''}>Maduración</option>
+                        <option value="Cosecha" ${APP_STATE.monitoring.growth.fenologia === 'Cosecha' ? 'selected' : ''}>Cosecha</option>
+                    </select>
+                </div>
             </div>
         </div>
-
+        
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%;" onclick="saveAndFinish()">GUARDAR REGISTRO FINAL</button>
+            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="saveAndFinish()">
+                <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+                FINALIZAR MONITOREO
+            </button>
         </div>
-    `;
+`;
 }
 
 function saveAndFinish() {
-    APP_STATE.monitoring.growth = {
-        poblacion: document.getElementById('mon-poblacion').value,
-        altura: document.getElementById('mon-altura').value,
-        lamina: document.getElementById('mon-lamina').value,
-        fenologia: document.getElementById('mon-fenologia').value
+    // Collect growth data
+    const growth = {
+        poblacion: document.getElementById('mon-poblacion')?.value || 0,
+        altura: document.getElementById('mon-altura')?.value || 0,
+        agua: document.getElementById('mon-agua')?.value || 'N/A',
+        fenologia: document.getElementById('mon-fenologia')?.value || 'N/A'
     };
+    APP_STATE.monitoring.growth = growth;
 
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     records.push({
@@ -969,7 +1067,6 @@ async function syncWithGoogleSheets() {
             alert('⚠️ ADVERTENCIA: La URL no parece ser de una "Aplicación Web" (debe terminar en /exec). Por favor, use el enlace "Cambiar URL" para corregirla.');
         }
 
-        // Enviar registros como texto plano para evitar preflight CORS y asegurar que llegue el body
         await fetch(scriptURL, {
             method: 'POST',
             mode: 'no-cors',
@@ -977,7 +1074,6 @@ async function syncWithGoogleSheets() {
             body: JSON.stringify(toSync)
         });
 
-        // Con no-cors no podemos ver el éxito real, pero si no tira error, asumimos envío
         toSync.forEach(r => r.synced = true);
         localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
 
@@ -991,7 +1087,6 @@ async function syncWithGoogleSheets() {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
-        // Force re-render to ensure UI reflects any state changes correctly
         renderView(APP_STATE.currentView);
     }
 }
@@ -1004,7 +1099,7 @@ async function installPWA() {
 
     // Wait for the user to respond to the prompt
     const { outcome } = await APP_STATE.deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
+    console.log(`User response to the install prompt: ${outcome} `);
 
     // We've used the prompt, and can't use it again, throw it away
     APP_STATE.deferredPrompt = null;
