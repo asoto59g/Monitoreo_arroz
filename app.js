@@ -459,7 +459,36 @@ function renderAdminLotes() {
 `;
 }
 
-// addItemArea removed
+// Administrative Helpers
+function addItemCiclo() {
+    const nombreInput = document.getElementById('new-ciclo-nombre');
+    if (!nombreInput || !nombreInput.value.trim()) {
+        alert('Por favor ingrese un nombre para el ciclo.');
+        return;
+    }
+
+    APP_STATE.collections.ciclos.push({
+        id: Date.now().toString(),
+        nombre: nombreInput.value.trim()
+    });
+    saveData();
+    renderView('admin_ciclos');
+}
+
+function addItemFinca() {
+    const nombreInput = document.getElementById('new-finca-nombre');
+    if (!nombreInput || !nombreInput.value.trim()) {
+        alert('Por favor ingrese un nombre para la finca.');
+        return;
+    }
+
+    APP_STATE.collections.fincas.push({
+        id: Date.now().toString(),
+        nombre: nombreInput.value.trim()
+    });
+    saveData();
+    renderView('admin_fincas');
+}
 
 function addItemLote() {
     const nombreInput = document.getElementById('new-lote-nombre');
