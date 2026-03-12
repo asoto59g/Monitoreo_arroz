@@ -1,7 +1,7 @@
 
 # Instalación y Uso de la Aplicación en Campo
 
-https://asoto59g.github.io/Monitoreo_arroz/
+
 
 ## 2. Instalar en el Teléfono
 
@@ -27,7 +27,7 @@ https://asoto59g.github.io/Monitoreo_arroz/
 2. Copie la **URL de su Google Script App**.
 3. Abra la aplicación en su teléfono.
 4. Presione **Sincronizar**.
-5. Pegue la **URL del Google Script** cuando se le solicite.
+5. Pegue la **URL del Google Script** cuando se le solicite. Este solo prueba
 
 https://script.google.com/macros/s/AKfycbzleBdROD0XcjYXt1M13YgadNdUQUbQpEQhd-jAmsJZq-OfLJNnPgDZbl7qLIqN9Nbd/exec
 
