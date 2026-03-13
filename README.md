@@ -1,4 +1,6 @@
-# Antes de empezar leer documento Procedimiento Generico de Evaluacion
+# 1. Descripcion General
+
+## La siguiente es una app para monitoreo en cultivo arroz
 
 
 
