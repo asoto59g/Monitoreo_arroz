@@ -80,7 +80,7 @@ Los registros se guardan localmente en el dispositivo y pueden sincronizarse a u
 
 ### 7.  Rapidamente con esta informacion se genera mapas de problemas
 
-arroz voluntario.png
+[arroz voluntario.png](https://github.com/asoto59g/Monitoreo_arroz/blob/5d988653746902829cc5dc95f8ea34f32d676079/arroz%20voluntario.png)
 
 ---
 
