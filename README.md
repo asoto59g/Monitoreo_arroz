@@ -1,6 +1,6 @@
 # 1. Descripcion General
 
-## La siguiente es una app para monitoreo en cultivo arroz
+## La siguiente es una app para monitoreo en cultivo arroz, para ser utilizada en telefonos portatiles actuales
 
 
 
