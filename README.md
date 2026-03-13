@@ -50,13 +50,13 @@ Cada plaga se califica con 4 niveles:
 
 Se registran **13 enfermedades** con dos tipos de escala:
 - **Escala 0–3** para enfermedades bacterianas y fungosas (Sarocladium, Xhantomonas, Helminstosporium…)
-- **Escala 0–9 (IRRI)** para enfermedades de mayor impacto (Piricularia Follaje, Piricularia Cuello, Rizoctonia…)
+- **Escala 0–9 (IRRI)** para enfermedades de mayor impacto (Piricularia Follaje, Piricularia Cuello, Rizoctonia…) 3 niveles de incidendencia y 3 niveles de severidad
 
 ---
 
 ### 4. 🌿 Malezas
 
-Se evalúan **23 especies de malezas** (gramíneas y de hoja ancha) con escala de densidad **0–9**:
+Se evalúan **23 especies de malezas** (gramíneas y de hoja ancha) con 3 escalas de densidad y 3 escalas de poblacion **0–9**:
 
 > Arroz Rojo, Echinochloa, Leptochloa, Digitaria, Cyperus iria, Ludwigia, Sesbania, Rottboellia, entre otras.
 
@@ -75,6 +75,11 @@ Datos agronómicos adicionales:
 ### 6. ☁️ Sincronización con Google Sheets
 
 Los registros se guardan localmente en el dispositivo y pueden sincronizarse a una hoja de cálculo de Google mediante un **Google Apps Script**. Compatible con trabajo sin internet.
+
+---
+
+### 7.  Rapidamente con esta informacion se genera mapas de problemas
+
 
 ---
 
