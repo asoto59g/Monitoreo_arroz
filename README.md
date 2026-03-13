@@ -80,6 +80,7 @@ Los registros se guardan localmente en el dispositivo y pueden sincronizarse a u
 
 ### 7.  Rapidamente con esta informacion se genera mapas de problemas
 
+arroz voluntario.png
 
 ---
 
