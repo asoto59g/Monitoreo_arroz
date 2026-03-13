@@ -459,69 +459,151 @@ body {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--glass-border);
     border-radius: 1.25rem;
-    padding: 1rem 0.5rem;
+    padding: 0.85rem 0.4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--text-secondary);
+    position: relative;
+    overflow: hidden;
 }
 
-.level-card i {
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
+.level-card:active {
+    transform: scale(0.93);
+}
+
+.level-icon-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.level-card.nulo .level-icon-wrap {
+    background: rgba(148, 163, 184, 0.12);
+}
+.level-card.bajo .level-icon-wrap {
+    background: rgba(16, 185, 129, 0.12);
+}
+.level-card.medio .level-icon-wrap {
+    background: rgba(245, 158, 11, 0.12);
+}
+.level-card.alto .level-icon-wrap {
+    background: rgba(239, 68, 68, 0.12);
 }
 
 .level-card span {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .level-card small {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     opacity: 0.5;
 }
 
 /* Active States for Level Cards (Solid/Lit up) */
 .level-card.active.nulo {
-    background: var(--text-secondary) !important;
-    border-color: var(--text-secondary);
-    color: #000 !important;
+    background: linear-gradient(145deg, #4b5563, #374151) !important;
+    border-color: #94a3b8;
+    color: #e2e8f0 !important;
+    box-shadow: 0 0 20px rgba(148, 163, 184, 0.35);
+}
+.level-card.active.nulo .level-icon-wrap {
+    background: rgba(255,255,255,0.15);
 }
 
 .level-card.active.bajo {
-    background: var(--accent-green) !important;
-    border-color: var(--accent-green);
-    color: #000 !important;
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+    background: linear-gradient(145deg, #059669, #047857) !important;
+    border-color: #10b981;
+    color: #fff !important;
+    box-shadow: 0 0 28px rgba(16, 185, 129, 0.55);
+}
+.level-card.active.bajo .level-icon-wrap {
+    background: rgba(255,255,255,0.18);
 }
 
 .level-card.active.medio {
-    background: var(--accent-yellow) !important;
-    border-color: var(--accent-yellow);
-    color: #000 !important;
-    box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
+    background: linear-gradient(145deg, #d97706, #b45309) !important;
+    border-color: #f59e0b;
+    color: #fff !important;
+    box-shadow: 0 0 28px rgba(245, 158, 11, 0.55);
+}
+.level-card.active.medio .level-icon-wrap {
+    background: rgba(255,255,255,0.18);
 }
 
 .level-card.active.alto {
-    background: var(--accent-red) !important;
-    border-color: var(--accent-red);
+    background: linear-gradient(145deg, #dc2626, #b91c1c) !important;
+    border-color: #ef4444;
     color: #fff !important;
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 28px rgba(239, 68, 68, 0.55);
 }
-
-.level-card.active i {
-    opacity: 1;
+.level-card.active.alto .level-icon-wrap {
+    background: rgba(255,255,255,0.18);
 }
 
 .level-card.active small {
-    opacity: 0.8;
+    opacity: 0.85;
+}
+
+/* Pest icon chip */
+.pest-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+/* Disease icon chip */
+.disease-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+    border: 1px solid rgba(139,92,246,0.2);
+}
+
+/* Weed icon chip */
+.weed-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15));
+    border: 1px solid rgba(16,185,129,0.2);
+}
+
+/* Monitor step enhanced */
+.step-item.active {
+    background: linear-gradient(135deg, #00c6fb, #005bea) !important;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 91, 234, 0.4);
+    transform: translateY(-2px);
 }
 
 /* Icon Grid for selection */

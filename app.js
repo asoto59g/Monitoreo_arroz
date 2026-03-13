@@ -217,24 +217,34 @@ function renderDashboard() {
     const pending = records.filter(r => !r.synced).length;
 
     return `
-        <div class="card" style="margin-top: 1rem;">
-            <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Hola, ${APP_STATE.user?.name || 'Plaguero'}</h1>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Listo para el monitoreo de hoy.</p>
+        <div class="card" style="margin-top: 1rem; background: linear-gradient(135deg, rgba(0,242,254,0.08), rgba(59,130,246,0.05)); border-color: rgba(0,242,254,0.15);">
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#00c6fb,#005bea);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🌾</div>
+                <div>
+                    <h1 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Hola, ${APP_STATE.user?.name || 'Plaguero'} 👋</h1>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Sistema de Monitoreo de Plagas</p>
+                </div>
+            </div>
         </div>
         
-        <div class="card" style="text-align: center; border: 1px dashed var(--accent-emerald); background: rgba(0, 242, 254, 0.03);">
-            <p style="margin-bottom: 1.5rem; font-weight: 500;">Comience un nuevo registro</p>
-            <button class="btn btn-primary" style="width: 100%; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);" onclick="startMonitoring()">NUEVO MONITOREO +</button>
+        <div class="card" style="border: 1px solid rgba(0,242,254,0.25); background: linear-gradient(135deg,rgba(0,242,254,0.05),rgba(0,91,234,0.03));">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
+                <span style="font-size:1.4rem;">📋</span>
+                <p style="font-weight: 600; font-size:1rem;">Nuevo Registro de Campo</p>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; box-shadow: 0 4px 20px rgba(0, 242, 254, 0.35); font-size:1rem;" onclick="startMonitoring()">🚀 INICIAR MONITOREO</button>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
-                <p style="font-size:0.7rem; color: var(--text-secondary); margin-bottom: 0.3rem;">TOTAL</p>
-                <p style="font-size: 1.2rem; font-weight: 700;">${records.length}</p>
+            <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center; background: linear-gradient(135deg,rgba(59,130,246,0.08),rgba(37,99,235,0.04));">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">📊</div>
+                <p style="font-size:0.65rem; color: var(--text-secondary); margin-bottom: 0.3rem;font-weight:700;letter-spacing:1px;">TOTAL</p>
+                <p style="font-size: 1.5rem; font-weight: 800;">${records.length}</p>
             </div>
-            <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
-                <p style="font-size:0.7rem; color: var(--text-secondary); margin-bottom: 0.3rem;">PENDIENTES</p>
-                <p style="font-size: 1.2rem; font-weight: 700; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
+            <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center; background: linear-gradient(135deg,${pending>0?'rgba(245,158,11,0.08)':'rgba(16,185,129,0.08)'},transparent);">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">${pending > 0 ? '⏳' : '✅'}</div>
+                <p style="font-size:0.65rem; color: var(--text-secondary); margin-bottom: 0.3rem;font-weight:700;letter-spacing:1px;">PENDIENTES</p>
+                <p style="font-size: 1.5rem; font-weight: 800; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
             </div>
         </div>
 
@@ -276,41 +286,35 @@ function renderDashboard() {
 function renderAdmin() {
     return `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div class="card-icon"><i data-lucide="settings"></i></div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#00c6fb,#005bea);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">⚙️</div>
                 <h2 style="font-size: 1.25rem;">Administración</h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('dashboard')">VOLVER</button>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('dashboard')">← VOLVER</button>
         </div>
         
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem;" onclick="renderView('admin_ciclos')">
-            <div class="card-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-emerald);">
-                <i data-lucide="refresh-cw"></i>
-            </div>
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(0,198,251,0.07),rgba(0,91,234,0.04));" onclick="renderView('admin_ciclos')">
+            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#0891b2,#0e7490);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🔄</div>
             <div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Ciclos</h3>
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Ciclos Agrícolas</h3>
                 <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.ciclos.length} registrados</p>
             </div>
             <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
         </div>
         
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem;" onclick="renderView('admin_fincas')">
-            <div class="card-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-emerald);">
-                <i data-lucide="building-2"></i>
-            </div>
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(245,158,11,0.07),rgba(180,83,9,0.04));" onclick="renderView('admin_fincas')">
+            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#d97706,#b45309);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🏠</div>
             <div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Fincas</h3>
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Fincas</h3>
                 <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.fincas.length} registradas</p>
             </div>
             <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
         </div>
         
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem;" onclick="renderView('admin_lotes')">
-            <div class="card-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-emerald);">
-                <i data-lucide="grid-3x3"></i>
-            </div>
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(16,185,129,0.07),rgba(5,150,105,0.04));" onclick="renderView('admin_lotes')">
+            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#059669,#047857);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🗂️</div>
             <div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Lotes</h3>
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Lotes / Parcelas</h3>
                 <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.lotes.length} registrados</p>
             </div>
             <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
@@ -782,17 +786,17 @@ function saveHeaderAndNext() {
 
 function renderMonitorNav(activeView) {
     const steps = [
-        { id: 'monitor_pests', icon: 'bug', label: 'Plagas' },
-        { id: 'monitor_diseases', icon: 'thermometer-sun', label: 'Enfer.' },
-        { id: 'monitor_weeds', icon: 'sprout', label: 'Malezas' },
-        { id: 'monitor_growth', icon: 'line-chart', label: 'Crecim.' }
+        { id: 'monitor_pests',    emoji: '🐛', label: 'Plagas' },
+        { id: 'monitor_diseases', emoji: '🦠', label: 'Enfer.' },
+        { id: 'monitor_weeds',    emoji: '🌿', label: 'Malezas' },
+        { id: 'monitor_growth',   emoji: '📈', label: 'Crecim.' }
     ];
 
     return `
         <div class="monitor-steps">
             ${steps.map(step => `
                 <div class="step-item ${activeView === step.id ? 'active' : ''}" onclick="renderView('${step.id}')">
-                    <i data-lucide="${step.icon}"></i>
+                    <span style="font-size:1.3rem;line-height:1;">${step.emoji}</span>
                     <span>${step.label}</span>
                 </div>
             `).join('')}
@@ -806,40 +810,76 @@ function renderMonitorPests() {
     // Unified 4-step navigation
     const navHtml = renderMonitorNav('monitor_pests');
 
-    const iconMap = {
-        spodoptera: 'bug',
-        sogata: 'bug-play',
-        mocis: 'shrub',
-        oebalus: 'wind',
-        tibraca: 'shield',
-        minador: 'scissors',
-        acarospinki: 'microscope',
-        rupella: 'cloud-lightning',
-        ratas: 'mouse-pointer-2',
-        piches: 'bird',
-        gallito: 'bird',
-        aranas: 'spider',
-        mariquitas: 'circle-dot',
-        avispas: 'antenna'
+    // Rich emoji icon map per pest, with colors per type
+    const pestIconMap = {
+        // Invertebrates
+        spodoptera: { emoji: '🐛', bg: 'linear-gradient(135deg,#7c3aed,#4f46e5)', border: 'rgba(124,58,237,0.3)' },
+        sogata:     { emoji: '🦗', bg: 'linear-gradient(135deg,#dc2626,#b91c1c)', border: 'rgba(220,38,38,0.3)' },
+        mocis:      { emoji: '🦋', bg: 'linear-gradient(135deg,#7c3aed,#6d28d9)', border: 'rgba(124,58,237,0.3)' },
+        oebalus:    { emoji: '🪲', bg: 'linear-gradient(135deg,#b45309,#92400e)', border: 'rgba(180,83,9,0.3)' },
+        tibraca:    { emoji: '🪳', bg: 'linear-gradient(135deg,#374151,#1f2937)', border: 'rgba(55,65,81,0.4)' },
+        minador:    { emoji: '🐜', bg: 'linear-gradient(135deg,#d97706,#b45309)', border: 'rgba(217,119,6,0.3)' },
+        acarospinki:{ emoji: '🕷️', bg: 'linear-gradient(135deg,#dc2626,#991b1b)', border: 'rgba(220,38,38,0.3)' },
+        rupella:    { emoji: '🦟', bg: 'linear-gradient(135deg,#0d9488,#0f766e)', border: 'rgba(13,148,136,0.3)' },
+        salton:     { emoji: '🦗', bg: 'linear-gradient(135deg,#65a30d,#4d7c0f)', border: 'rgba(101,163,13,0.3)' },
+        tetranychus:{ emoji: '🕸️', bg: 'linear-gradient(135deg,#dc2626,#b91c1c)', border: 'rgba(220,38,38,0.3)' },
+        afidos:     { emoji: '🐝', bg: 'linear-gradient(135deg,#ca8a04,#a16207)', border: 'rgba(202,138,4,0.3)' },
+        nematodos:  { emoji: '🪱', bg: 'linear-gradient(135deg,#854d0e,#713f12)', border: 'rgba(133,77,14,0.3)' },
+        marasmia:   { emoji: '🦎', bg: 'linear-gradient(135deg,#166534,#14532d)', border: 'rgba(22,101,52,0.3)' },
+        diatrea:    { emoji: '🐛', bg: 'linear-gradient(135deg,#c2410c,#9a3412)', border: 'rgba(194,65,12,0.3)' },
+        gorgojo:    { emoji: '🪲', bg: 'linear-gradient(135deg,#1e3a5f,#1e40af)', border: 'rgba(30,58,138,0.3)' },
+        // Vertebrates
+        ratas:      { emoji: '🐀', bg: 'linear-gradient(135deg,#475569,#334155)', border: 'rgba(71,85,105,0.4)' },
+        gallito:    { emoji: '🦤', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', border: 'rgba(6,182,212,0.3)' },
+        piches:     { emoji: '🦆', bg: 'linear-gradient(135deg,#0ea5e9,#0284c7)', border: 'rgba(14,165,233,0.3)' },
+        piuses:     { emoji: '🐦', bg: 'linear-gradient(135deg,#7c3aed,#6d28d9)', border: 'rgba(124,58,237,0.3)' },
+        sargento:   { emoji: '🐦‍⬛', bg: 'linear-gradient(135deg,#1e40af,#1e3a8a)', border: 'rgba(30,64,175,0.3)' },
+        zarseta:    { emoji: '🦅', bg: 'linear-gradient(135deg,#92400e,#78350f)', border: 'rgba(146,64,14,0.3)' },
+        zanate:     { emoji: '🐦', bg: 'linear-gradient(135deg,#111827,#030712)', border: 'rgba(75,85,99,0.4)' },
+        // Beneficials
+        pentatomidos:{ emoji: '🪲', bg: 'linear-gradient(135deg,#059669,#047857)', border: 'rgba(5,150,105,0.3)' },
+        libelulas:  { emoji: '🪰', bg: 'linear-gradient(135deg,#0891b2,#0e7490)', border: 'rgba(8,145,178,0.3)' },
+        aranas:     { emoji: '🕷️', bg: 'linear-gradient(135deg,#9f1239,#881337)', border: 'rgba(159,18,57,0.3)' },
+        mariquitas: { emoji: '🐞', bg: 'linear-gradient(135deg,#dc2626,#b91c1c)', border: 'rgba(220,38,38,0.3)' },
+        crisopas:   { emoji: '🦗', bg: 'linear-gradient(135deg,#16a34a,#15803d)', border: 'rgba(22,163,74,0.3)' },
+        avispas:    { emoji: '🐝', bg: 'linear-gradient(135deg,#d97706,#b45309)', border: 'rgba(217,119,6,0.3)' },
+        hongos:     { emoji: '🍄', bg: 'linear-gradient(135deg,#9f1239,#881337)', border: 'rgba(159,18,57,0.3)' },
+        parasitacion:{ emoji: '🦠', bg: 'linear-gradient(135deg,#0d9488,#0f766e)', border: 'rgba(13,148,136,0.3)' },
     };
 
     ['invertebrates', 'vertebrates', 'beneficials'].forEach(type => {
-        const title = type === 'invertebrates' ? 'Plagas Invertebradas' : type === 'vertebrates' ? 'Plagas Vertebradas' : 'Benéficos';
-        pestsHtml += `<h3 style="margin: 1.5rem 0 0.5rem; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 1px;">${title.toUpperCase()}</h3>`;
+        const sectionColors = {
+            invertebrates: { label: 'PLAGAS INVERTEBRADAS', accent: '#ef4444' },
+            vertebrates:   { label: 'PLAGAS VERTEBRADAS',   accent: '#3b82f6' },
+            beneficials:   { label: 'BENÉFICOS',            accent: '#10b981' }
+        }[type];
+        pestsHtml += `<div style="display:flex;align-items:center;gap:0.5rem;margin:1.5rem 0 0.75rem;">
+            <div style="width:3px;height:14px;border-radius:2px;background:${sectionColors.accent};"></div>
+            <h3 style="color:${sectionColors.accent};font-size:0.72rem;letter-spacing:1.5px;font-weight:800;">${sectionColors.label}</h3>
+        </div>`;
 
         PEST_DB[type].forEach(pest => {
             const currentLevel = APP_STATE.monitoring.pests[pest.id] || 0;
             const isLow = currentLevel > 0;
             const isMed = currentLevel > 1;
             const isHigh = currentLevel > 2;
-            const icon = iconMap[pest.id] || (type === 'beneficials' ? 'heart' : 'bug');
+            const iconInfo = pestIconMap[pest.id] || {
+                emoji: type === 'beneficials' ? '🌿' : '🐛',
+                bg: type === 'beneficials' ? 'linear-gradient(135deg,#059669,#047857)' : 'linear-gradient(135deg,#dc2626,#b91c1c)',
+                border: type === 'beneficials' ? 'rgba(5,150,105,0.3)' : 'rgba(220,38,38,0.3)'
+            };
 
             pestsHtml += `
                 <div id="pest-${pest.id}" class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <i data-lucide="${icon}" style="width: 20px; height: 20px; color: var(--accent-emerald);"></i>
-                            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${pest.name}</span>
+                            <div class="pest-icon-badge" style="background:${iconInfo.bg};border:1px solid ${iconInfo.border};">
+                                ${iconInfo.emoji}
+                            </div>
+                            <div>
+                                <span style="font-weight: 700; font-size: 1rem; letter-spacing: -0.5px; display:block;">${pest.name}</span>
+                                <span style="font-size:0.65rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Nivel de Población</span>
+                            </div>
                         </div>
                         <div class="threshold-indicator" style="margin-bottom: 0;">
                             <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
@@ -850,22 +890,22 @@ function renderMonitorPests() {
 
                     <div class="level-selector-premium">
                         <div class="level-card nulo ${currentLevel == 0 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 0)">
-                            <i data-lucide="ghost"></i>
+                            <div class="level-icon-wrap">🚫</div>
                             <span>NULO</span>
                             <small>0%</small>
                         </div>
                         <div class="level-card bajo ${currentLevel == 1 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 1)">
-                            <i data-lucide="sprout"></i>
+                            <div class="level-icon-wrap">🌿</div>
                             <span>BAJO</span>
                             <small>25%</small>
                         </div>
                         <div class="level-card medio ${currentLevel == 2 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 2)">
-                            <i data-lucide="hand"></i>
+                            <div class="level-icon-wrap">✋</div>
                             <span>MEDIO</span>
                             <small>50%</small>
                         </div>
                         <div class="level-card alto ${currentLevel == 3 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 3)">
-                            <i data-lucide="flame"></i>
+                            <div class="level-icon-wrap">🔥</div>
                             <span>ALTO</span>
                             <small>75%+</small>
                         </div>
@@ -943,13 +983,23 @@ function renderMonitorDiseases() {
         const isMed = isAdvancedScale ? currentLevel > 3 : currentLevel > 1;
         const isHigh = isAdvancedScale ? currentLevel > 6 : currentLevel > 2;
 
+        // Disease emoji icons
+        const diseaseIconMap_local = {
+            sarocladium: '🍂', xhantomonas: '🦠', pseudomonas: '🔬',
+            burkholderia: '⚗️', helminstosporium: '🍁', dreslera: '🌾',
+            erwinia: '🧫', hojablanca: '🌿', falsocarbon: '⬛',
+            piriculariaf: '🌫️', piriculariac: '💀', manchadograno: '🟤',
+            rizoctonia: '🍄'
+        };
+        const dEmoji = diseaseIconMap_local[d.id] || '🦠';
+
         diseaseHtml += `
             <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <i data-lucide="test-tube-2" style="width: 20px; height: 20px; color: var(--accent-emerald);"></i>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <div class="disease-icon-badge">${dEmoji}</div>
                         <div>
-                            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${d.name}</span>
+                            <span style="font-weight: 700; font-size: 1rem; letter-spacing: -0.5px; display:block;">${d.name}</span>
                             <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
                                 ${isAdvancedScale ? 'Escala 0-9 (IRRI)' : 'Escala 0-3'}
                             </div>
@@ -969,22 +1019,22 @@ function renderMonitorDiseases() {
                 ` : `
                     <div class="level-selector-premium">
                         <div class="level-card nulo ${currentLevel == 0 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 0)">
-                            <i data-lucide="ghost"></i>
+                            <div class="level-icon-wrap">🚫</div>
                             <span>NULO</span>
                             <small>0%</small>
                         </div>
                         <div class="level-card bajo ${currentLevel == 1 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 1)">
-                            <i data-lucide="sprout"></i>
+                            <div class="level-icon-wrap">🌿</div>
                             <span>BAJO</span>
                             <small>25%</small>
                         </div>
                         <div class="level-card medio ${currentLevel == 2 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 2)">
-                            <i data-lucide="hand"></i>
+                            <div class="level-icon-wrap">✋</div>
                             <span>MEDIO</span>
                             <small>50%</small>
                         </div>
                         <div class="level-card alto ${currentLevel == 3 ? 'active' : ''}" onclick="setDiseaseLevel('${d.id}', 3)">
-                            <i data-lucide="flame"></i>
+                            <div class="level-icon-wrap">🔥</div>
                             <span>ALTO</span>
                             <small>75%+</small>
                         </div>
@@ -1039,13 +1089,24 @@ function renderMonitorWeeds() {
         for (let i = 4; i <= 6; i++) buttons += `<button class="level-btn btn-yellow ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel('${wName}', ${i})">${i}</button>`;
         for (let i = 7; i <= 9; i++) buttons += `<button class="level-btn btn-red ${currentLevel == i ? 'active' : ''}" onclick="setWeedLevel('${wName}', ${i})">${i}</button>`;
 
+        // Weed emoji map
+        const weedEmojiMap = {
+            'Arroz Rojo':'🌾','Echinochloa':'🌱','Leptochloa':'🌿','Arroz Pato':'🦆',
+            'Arroz Voluntario':'🌾','Digitaria':'🌱','Eleusine':'🌿','Rottboellia':'🌱',
+            'Ischaemun':'🍃','Aeschynomene':'🌿','Cyperus iria':'🌱','Eclipta alba':'🌼',
+            'Fimbrystilis':'🌿','Caperonia':'🍀','C. rotundus':'🌱','Ludwigia':'💧',
+            'Navajuela':'⚔️','Murdannia':'🌿','Sesbania':'🌺','Portulaca':'🌸',
+            'Heterantera':'💧','Amarantus':'🌱','Esfenoclea':'🌿'
+        };
+        const wEmoji = weedEmojiMap[wName] || '🌱';
+
         selectedHtml += `
             <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <i data-lucide="sprout" style="width: 20px; height: 20px; color: var(--accent-emerald);"></i>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <div class="weed-icon-badge">${wEmoji}</div>
                         <div>
-                            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px;">${wName}</span>
+                            <span style="font-weight: 700; font-size: 1rem; letter-spacing: -0.5px; display:block;">${wName}</span>
                             <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Densidad (0-9)</div>
                         </div>
                     </div>
