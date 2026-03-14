@@ -667,6 +667,9 @@ function deleteRecord(index) {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     records.splice(index, 1);
     localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
+    if (records.length === 0) {
+        localStorage.setItem('abc_record_counter', '0');
+    }
     renderView('records');
 }
 
@@ -1332,6 +1335,9 @@ function saveAndFinish() {
         alert(`✅ Registro #${existing.num || ''} actualizado correctamente.`);
     } else {
         // ── MODO NUEVO: asignar autonúmero y agregar ──
+        if (records.length === 0) {
+            localStorage.setItem('abc_record_counter', '0');
+        }
         let counter = parseInt(localStorage.getItem('abc_record_counter') || '0') + 1;
         localStorage.setItem('abc_record_counter', counter.toString());
 
