@@ -612,11 +612,18 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
-    margin-bottom: 2rem;
-    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 1rem;
+    background: rgba(7, 12, 28, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 0.5rem;
     border-radius: 1.25rem;
     border: 1px solid var(--glass-border);
+    /* Sticky: se pega al tope del área de scroll */
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .step-item {
