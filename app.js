@@ -1408,6 +1408,7 @@ async function syncWithGoogleSheets() {
         // Borrar localmente los registros que fueron sincronizados
         const remainingRecords = records.filter(r => !toSync.some(ts => ts.id === r.id));
         localStorage.setItem('abc_monitoring_records', JSON.stringify(remainingRecords));
+        localStorage.setItem('abc_record_counter', '0'); // Reiniciar autonúmero
 
         alert(`✅ Sincronización exitosa: ${toSync.length} registros enviados y eliminados del dispositivo.`);
         renderView(APP_STATE.currentView);
