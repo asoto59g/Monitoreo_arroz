@@ -725,37 +725,55 @@ function startMonitoring() {
     APP_STATE.monitoring.weeds = {};
     WEED_DB.forEach(w => APP_STATE.monitoring.weeds[w] = 0);
 
-    renderView('monitor_header');
-    getGPSCoordinates();
-}
+    // Validar GPS antes de continuar
+    if (!("geolocation" in navigator)) {
+        alert("Su dispositivo no soporta geolocalización. Imposible continuar sin coordenadas.");
+        return;
+    }
 
-function getGPSCoordinates() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition((position) => {
+    const gpsLabel = document.getElementById('gps-status');
+    if (gpsLabel) {
+        gpsLabel.innerHTML = "📡 Buscando GPS...";
+        gpsLabel.style.color = 'var(--text-secondary)';
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            // GPS OK
             APP_STATE.monitoring.coords = {
                 lat: position.coords.latitude,
                 lon: position.coords.longitude,
                 alt: position.coords.altitude,
                 acc: position.coords.accuracy
             };
-            const gpsLabel = document.getElementById('gps-status');
             if (gpsLabel) {
                 gpsLabel.innerHTML = `📡 Lat: ${position.coords.latitude.toFixed(5)}, Lon: ${position.coords.longitude.toFixed(5)} `;
                 gpsLabel.style.color = 'var(--accent-emerald)';
             }
-        }, (error) => {
+            // Navegar al encabezado solo si hay éxito
+            renderView('monitor_header');
+        },
+        (error) => {
+            // Error de GPS
             console.error("Error capturing GPS", error);
-            const gpsLabel = document.getElementById('gps-status');
             if (gpsLabel) {
                 gpsLabel.innerHTML = "❌ Error GPS";
                 gpsLabel.style.color = 'var(--accent-red)';
             }
-        }, {
+            
+            let errorMsg = "No se pudo obtener la ubicación. Por favor revise que el GPS esté encendido en su dispositivo y tenga permisos.";
+            if (error.code === error.PERMISSION_DENIED) errorMsg = "Permiso de ubicación denegado. Debe autorizar el GPS para esta app.";
+            else if (error.code === error.POSITION_UNAVAILABLE) errorMsg = "Información de ubicación no disponible. Encienda o acerque el dispositivo al aire libre.";
+            else if (error.code === error.TIMEOUT) errorMsg = "Tiempo de espera agotado buscando señal GPS. Asegúrese de tener el GPS encendido.";
+            
+            alert(`⚠️ ALERTA GPS: ${errorMsg}`);
+        },
+        {
             enableHighAccuracy: true,
-            timeout: 5000,
+            timeout: 10000,
             maximumAge: 0
-        });
-    }
+        }
+    );
 }
 
 function renderMonitorHeader() {
