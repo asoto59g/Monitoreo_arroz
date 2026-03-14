@@ -147,10 +147,11 @@ function initNavigation() {
     });
 }
 
-function renderView(viewName) {
+function renderView(viewName, preserveScroll) {
     const mainContent = document.getElementById('main-content');
     const bottomNav = document.querySelector('.bottom-nav');
     if (!mainContent) return;
+    const savedScroll = preserveScroll ? (document.documentElement.scrollTop || document.body.scrollTop) : 0;
 
     // Check for registration first
     if (!APP_STATE.user && viewName !== 'registration') {
@@ -204,6 +205,13 @@ function renderView(viewName) {
             break;
         default:
             mainContent.innerHTML = `<div class="card"><h2>${viewName}</h2><p>En desarrollo...</p></div>`;
+    }
+
+    // Scroll to top on view change, or restore previous scroll position if preserveScroll is set
+    if (preserveScroll) {
+        window.scrollTo(0, savedScroll);
+    } else {
+        window.scrollTo(0, 0);
     }
 
     // Initialize Lucide icons after rendering
@@ -795,7 +803,7 @@ function renderMonitorNav(activeView) {
     return `
         <div class="monitor-steps">
             ${steps.map(step => `
-                <div class="step-item ${activeView === step.id ? 'active' : ''}" onclick="renderView('${step.id}')">
+                <div class="step-item ${activeView === step.id ? 'active' : ''}" onclick="window.scrollTo(0,0); renderView('${step.id}')">
                     <span style="font-size:1.3rem;line-height:1;">${step.emoji}</span>
                     <span>${step.label}</span>
                 </div>
@@ -942,12 +950,12 @@ function renderMonitorPests() {
 
 function setPestLevel(id, level) {
     APP_STATE.monitoring.pests[id] = level;
-    renderView('monitor_pests'); // Re-rendering to update threshold dots easily
+    renderView('monitor_pests', true); // preserve scroll position while selecting levels
 }
 
 function setDiseaseLevel(id, level) {
     APP_STATE.monitoring.diseases[id] = level;
-    renderView('monitor_diseases');
+    renderView('monitor_diseases', true);
 }
 
 function getLevelName(level, isAdvancedScale) {
@@ -1151,7 +1159,7 @@ function renderMonitorWeeds() {
 
 function setWeedLevel(wName, level) {
     APP_STATE.monitoring.weeds[wName] = parseInt(level);
-    renderView('monitor_weeds');
+    renderView('monitor_weeds', true); // preserve scroll position while selecting levels
 }
 
 function renderMonitorGrowth() {
