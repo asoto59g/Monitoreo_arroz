@@ -31,7 +31,8 @@ const APP_STATE = {
             fenologia: 0
         }
     },
-    deferredPrompt: null
+    deferredPrompt: null,
+    editingRecordIdx: null   // índice del registro local que se está editando (null = nuevo)
 };
 
 function saveData() {
@@ -538,40 +539,94 @@ function renderRecords() {
         const dateStr = date.toLocaleDateString();
         const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const originalIdx = records.length - 1 - idx;
+        const recNum = r.num ? `<span style="font-size:0.6rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:99px;background:rgba(255,255,255,0.07);color:var(--text-secondary);border:1px solid var(--glass-border);margin-right:0.4rem;">#${r.num}</span>` : '';
 
         const h = r.header || {};
         const coords = r.coords || {};
 
+        // --- chip helpers ---
+        const chipStyle = (val, maxScale) => {
+            const pct = val / maxScale;
+            if (pct <= 0.33) return 'background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.5);color:#10b981;';
+            if (pct <= 0.66) return 'background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);color:#f59e0b;';
+            return 'background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#ef4444;';
+        };
+        const chip = (label, val, maxScale) =>
+            `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.18rem 0.5rem;border-radius:99px;${chipStyle(val,maxScale)}font-size:0.65rem;font-weight:700;margin:0.15rem;">${label}&nbsp;<strong>${val}</strong></span>`;
+
+        // --- Plagas ---
+        const allPestNames = {};
+        [...(PEST_DB.invertebrates||[]),...(PEST_DB.vertebrates||[]),...(PEST_DB.beneficials||[])].forEach(p=>allPestNames[p.id]=p.name);
+        const pestChips = Object.entries(r.pests||{}).filter(([,v])=>v>0)
+            .map(([id,val])=>chip(allPestNames[id]||id, val, 3)).join('');
+
+        // --- Enfermedades ---
+        const allDiseaseInfo = {};
+        (DISEASE_DB||[]).forEach(d=>allDiseaseInfo[d.id]={name:d.name,scale:d.scale||3});
+        const diseaseChips = Object.entries(r.diseases||{}).filter(([,v])=>v>0)
+            .map(([id,val])=>{ const i=allDiseaseInfo[id]||{name:id,scale:9}; return chip(i.name, val, i.scale); }).join('');
+
+        // --- Malezas ---
+        const weedChips = Object.entries(r.weeds||{}).filter(([,v])=>v>0)
+            .map(([name,val])=>chip(name, val, 9)).join('');
+
+        // --- Crecimiento ---
+        const g = r.growth || {};
+        const blueChip = (label) => `<span style="padding:0.18rem 0.5rem;border-radius:99px;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.4);color:#60a5fa;font-size:0.65rem;font-weight:700;margin:0.15rem;">${label}</span>`;
+        const purpleChip = (label) => `<span style="padding:0.18rem 0.5rem;border-radius:99px;background:rgba(139,92,246,0.18);border:1px solid rgba(139,92,246,0.4);color:#a78bfa;font-size:0.65rem;font-weight:700;margin:0.15rem;">${label}</span>`;
+        const growthChips = [
+            g.poblacion ? blueChip(`👥 ${g.poblacion} pl/m²`) : '',
+            g.altura    ? blueChip(`📏 ${g.altura} cm`) : '',
+            g.agua      ? blueChip(`💧 ${g.agua}`) : '',
+            g.fenologia ? purpleChip(`🌱 ${g.fenologia}`) : ''
+        ].filter(Boolean).join('');
+
+        const section = (emoji, label, chips) => chips ? `
+            <div style="margin-bottom:0.5rem;">
+                <div style="font-size:0.58rem;font-weight:800;letter-spacing:1.2px;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.3rem;">${emoji} ${label}</div>
+                <div style="display:flex;flex-wrap:wrap;">${chips}</div>
+            </div>` : '';
+
+        const details = section('🐛','Plagas',pestChips)
+                      + section('🦠','Enfermedades',diseaseChips)
+                      + section('🌿','Malezas',weedChips)
+                      + section('📈','Crecimiento',growthChips);
+
         return `
             <div class="card" style="padding: 1.25rem; border-left: 5px solid ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; animation: slideUp 0.4s ease-out backwards; animation-delay: ${idx * 0.05}s;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
                     <div style="display: flex; gap: 0.75rem;">
                         <div class="card-icon" style="margin-top: 0.2rem;">
                             <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); letter-spacing: -0.5px;">${h.lote_name || 'Lote Descon.'}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;">
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); letter-spacing: -0.5px;">${recNum}${h.lote_name || 'Lote Descon.'}</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;">
                                 <i data-lucide="calendar" style="width: 12px; height: 12px;"></i>
                                 ${dateStr} • ${timeStr}
                             </div>
                         </div>
                     </div>
-                    <span style="font-size: 0.65rem; padding: 0.25rem 0.6rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; font-weight: 800; border: 1px solid currentColor;">
-                        ${r.synced ? 'SINC:' : 'PEND:'}
-                    </span>
+                    <div style="display:flex;align-items:center;gap:0.4rem;">
+                        ${!r.synced ? `<button onclick="editRecord(${originalIdx})" style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.55rem;border-radius:99px;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.45);color:#60a5fa;font-size:0.65rem;font-weight:800;cursor:pointer;">✏️ EDITAR</button>` : ''}
+                        <span style="font-size: 0.65rem; padding: 0.25rem 0.6rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; font-weight: 800; border: 1px solid currentColor; white-space:nowrap;">
+                            ${r.synced ? 'SINC' : 'PEND'}
+                        </span>
+                    </div>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.6rem;">
                     <div><strong>Ciclo:</strong> ${h.ciclo_name || '-'}</div>
                     <div><strong>Variedad:</strong> ${h.variedad || '-'}</div>
                     <div><strong>Plaguero:</strong> ${h.plaguero || '-'}</div>
-                    <div><strong>Área:</strong> ${h.area || '-'}</div>
+                    <div><strong>Área:</strong> ${h.area || '-'} Ha | <strong>Edad:</strong> ${h.edad || '-'} dds</div>
                 </div>
 
-                <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                    📍 Lat: ${coords.lat?.toFixed(5) || '?'}, Lon: ${coords.lon?.toFixed(5) || '?'}
+                <div style="background: rgba(0,0,0,0.2); padding: 0.4rem 0.6rem; border-radius: 8px; font-size: 0.68rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                    📍 ${coords.lat?.toFixed(5) || '?'}, ${coords.lon?.toFixed(5) || '?'}
                 </div>
+
+                ${details ? `<div style="border-top:1px solid var(--glass-border);padding-top:0.65rem;margin-bottom:0.75rem;">${details}</div>` : ''}
 
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.75rem; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; gap: 0.3rem;" onclick="deleteRecord(${originalIdx})">
@@ -615,7 +670,33 @@ function deleteRecord(index) {
     renderView('records');
 }
 
+function editRecord(index) {
+    const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+    const rec = records[index];
+    if (!rec) return;
+
+    // Cargar datos del registro al estado de monitoreo
+    APP_STATE.editingRecordIdx = index;
+    APP_STATE.monitoring.coords  = rec.coords  || null;
+    APP_STATE.monitoring.header  = rec.header  || {};
+    APP_STATE.monitoring.pests   = rec.pests   || {};
+    APP_STATE.monitoring.diseases = rec.diseases || {};
+    APP_STATE.monitoring.weeds   = rec.weeds   || {};
+    APP_STATE.monitoring.growth  = rec.growth  || { poblacion:0, altura:0, lamina:0, fenologia:0 };
+
+    // Asegurar que todas las especies tengan al menos un valor
+    PEST_DB.invertebrates.forEach(p => { if (!(p.id in APP_STATE.monitoring.pests))   APP_STATE.monitoring.pests[p.id] = 0; });
+    PEST_DB.vertebrates.forEach(p   => { if (!(p.id in APP_STATE.monitoring.pests))   APP_STATE.monitoring.pests[p.id] = 0; });
+    PEST_DB.beneficials.forEach(p   => { if (!(p.id in APP_STATE.monitoring.pests))   APP_STATE.monitoring.pests[p.id] = 0; });
+    DISEASE_DB.forEach(d => { if (!(d.id in APP_STATE.monitoring.diseases)) APP_STATE.monitoring.diseases[d.id] = 0; });
+    WEED_DB.forEach(w    => { if (!(w    in APP_STATE.monitoring.weeds))    APP_STATE.monitoring.weeds[w] = 0; });
+
+    renderView('monitor_pests');
+}
+
 function startMonitoring() {
+    APP_STATE.editingRecordIdx = null; // nuevo monitoreo, no edición
+
     // Reset and Initialize with zeros for ALL species
     APP_STATE.monitoring.pests = {};
     PEST_DB.invertebrates.forEach(p => APP_STATE.monitoring.pests[p.id] = 0);
@@ -1226,24 +1307,50 @@ function saveAndFinish() {
         return;
     }
 
-    APP_STATE.monitoring.growth = {
-        poblacion,
-        altura,
-        agua,
-        fenologia
-    };
+    APP_STATE.monitoring.growth = { poblacion, altura, agua, fenologia };
 
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
-    records.push({
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        coords: APP_STATE.monitoring.coords,
-        user: APP_STATE.user, // Guardar info del usuario que realizó el monitoreo
-        ...APP_STATE.monitoring
-    });
-    localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
 
+    if (APP_STATE.editingRecordIdx !== null) {
+        // ── MODO EDICIÓN: reemplazar registro existente ──
+        const existing = records[APP_STATE.editingRecordIdx] || {};
+        records[APP_STATE.editingRecordIdx] = {
+            id:        existing.id,
+            num:       existing.num,
+            timestamp: existing.timestamp,
+            editedAt:  new Date().toISOString(),
+            synced:    false,
+            coords:    APP_STATE.monitoring.coords || existing.coords,
+            user:      APP_STATE.user,
+            header:    APP_STATE.monitoring.header,
+            pests:     APP_STATE.monitoring.pests,
+            diseases:  APP_STATE.monitoring.diseases,
+            weeds:     APP_STATE.monitoring.weeds,
+            growth:    APP_STATE.monitoring.growth
+        };
+        localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
+        alert(`✅ Registro #${existing.num || ''} actualizado correctamente.`);
+    } else {
+        // ── MODO NUEVO: asignar autonúmero y agregar ──
+        let counter = parseInt(localStorage.getItem('abc_record_counter') || '0') + 1;
+        localStorage.setItem('abc_record_counter', counter.toString());
+
+        records.push({
+            id: Date.now().toString(),
+            num: counter,
+            timestamp: new Date().toISOString(),
+            coords: APP_STATE.monitoring.coords,
+            user: APP_STATE.user,
+            ...APP_STATE.monitoring
+        });
+        localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
+        alert(`✅ Registro #${counter} guardado exitosamente.`);
+    }
+
+    // Limpiar estado
+    APP_STATE.editingRecordIdx = null;
     APP_STATE.monitoring = {
+        coords: null,
         header: null,
         pests: {},
         diseases: {},
@@ -1251,9 +1358,8 @@ function saveAndFinish() {
         growth: { poblacion: 0, altura: 0, lamina: 0, fenologia: 0 }
     };
 
-    alert('¡Registro guardado exitosamente!');
     window.scrollTo(0, 0);
-    renderView('dashboard');
+    renderView('records');
 }
 
 async function syncWithGoogleSheets() {
