@@ -546,9 +546,21 @@ function renderRecords() {
 
         // --- chip helpers ---
         const chipStyle = (val, maxScale) => {
-            const pct = val / maxScale;
-            if (pct <= 0.33) return 'background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.5);color:#10b981;';
-            if (pct <= 0.66) return 'background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);color:#f59e0b;';
+            let cat = 'high'; // default red
+            if (maxScale === 9) {
+                if (val <= 3) cat = 'low';
+                else if (val <= 6) cat = 'medium';
+            } else if (maxScale === 3) {
+                if (val === 1) cat = 'low';
+                else if (val === 2) cat = 'medium';
+            } else {
+                const pct = val / maxScale;
+                if (pct <= 0.34) cat = 'low';
+                else if (pct <= 0.67) cat = 'medium';
+            }
+            
+            if (cat === 'low') return 'background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.5);color:#10b981;';
+            if (cat === 'medium') return 'background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);color:#f59e0b;';
             return 'background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#ef4444;';
         };
         const chip = (label, val, maxScale) =>
