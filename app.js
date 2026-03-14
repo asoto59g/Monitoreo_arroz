@@ -215,6 +215,11 @@ function renderView(viewName, preserveScroll) {
         window.scrollTo(0, 0);
     }
 
+    // Ejecutar scripts post-render específicos de la vista
+    if (viewName === 'admin_lotes' && typeof updateLotesSugeridos === 'function') {
+        updateLotesSugeridos();
+    }
+
     // Initialize Lucide icons after rendering
     if (window.lucide) {
         window.lucide.createIcons();
@@ -431,11 +436,12 @@ function renderAdminLotes() {
             </div>
             <div class="field-group">
                 <label>Finca</label>
-                <select id="new-lote-finca" class="input-modern">${fincaOptions}</select>
+                <select id="new-lote-finca" class="input-modern" onchange="updateLotesSugeridos()">${fincaOptions}</select>
             </div>
             <div class="field-group">
                 <label>Nombre del Lote</label>
-                <input type="text" id="new-lote-nombre" class="input-modern" placeholder="Ej: Lote A1">
+                <input type="text" id="new-lote-nombre" class="input-modern" placeholder="Ej: Lote A1" list="lotes-historicos" autocomplete="off">
+                <datalist id="lotes-historicos"></datalist>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="field-group">
@@ -469,7 +475,31 @@ function renderAdminLotes() {
                 `;
     }).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay lotes.</p>'}
         </div>
+        <script>
+            setTimeout(() => { if (typeof updateLotesSugeridos === "function") updateLotesSugeridos(); }, 0);
+        </script>
 `;
+}
+
+function updateLotesSugeridos() {
+    const fincaSelect = document.getElementById('new-lote-finca');
+    const datalist = document.getElementById('lotes-historicos');
+    if (!fincaSelect || !datalist) return;
+
+    const fincaId = fincaSelect.value;
+    if (!fincaId) {
+        datalist.innerHTML = '';
+        return;
+    }
+
+    // Filtrar lotes históricos de esta finca
+    const lotesFinca = APP_STATE.collections.lotes.filter(l => l.fincaId === fincaId);
+    
+    // Obtener nombres únicos usando Set
+    const nombresUnicos = [...new Set(lotesFinca.map(l => l.nombre))].sort();
+    
+    // Llenar datalist
+    datalist.innerHTML = nombresUnicos.map(nombre => `<option value="${nombre}">`).join('');
 }
 
 // Administrative Helpers

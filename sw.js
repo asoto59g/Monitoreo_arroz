@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abc-rice-v5';
+const CACHE_NAME = 'abc-rice-v6';
 const ASSETS = [
     './',
     './index.html',
