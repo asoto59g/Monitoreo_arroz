@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abc-rice-v3';
+const CACHE_NAME = 'abc-rice-v4';
 const ASSETS = [
     '/',
     '/index.html',
@@ -29,41 +29,47 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    // Si la solicitud es para un recurso externo como fuentes o iconos (Google Fonts, unpkg, etc.)
+    // Para navegación puramente HTML (cuando se abre la PWA)
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => {
+                return caches.match('/index.html');
+            })
+        );
+        return;
+    }
+
+    // Recursos externos (Iconos, Google Fonts, unpkg)
     if (event.request.url.startsWith('http') && !event.request.url.includes(self.location.origin)) {
         event.respondWith(
             caches.match(event.request).then(cachedResponse => {
-                if (cachedResponse) {
-                    return cachedResponse; // Retorna desde caché local inmediatamente
-                }
+                if (cachedResponse) return cachedResponse;
                 return fetch(event.request).then(networkResponse => {
                     return caches.open(CACHE_NAME).then(cache => {
                         cache.put(event.request, networkResponse.clone());
                         return networkResponse;
                     });
                 }).catch(() => {
-                    // Ignora silenciosamente si falla la red para el recurso externo
-                    console.warn('Network fetch failed for external asset:', event.request.url);
+                    console.warn('Recurso externo no disponible offline:', event.request.url);
                 });
             })
         );
         return;
     }
 
-    // Para archivos de la propia app (index.html, style.css, app.js, iconos)
+    // Estrategia Stale-While-Revalidate para el resto (CSS, JS)
     event.respondWith(
-        caches.match(event.request).then(response => {
-            // Estrategia Stale-While-Revalidate para la propia app: devuelve caché y actualiza en background
+        caches.match(event.request).then(cachedResponse => {
             const fetchPromise = fetch(event.request).then(networkResponse => {
-                caches.open(CACHE_NAME).then(cache => {
+                return caches.open(CACHE_NAME).then(cache => {
                     cache.put(event.request, networkResponse.clone());
+                    return networkResponse;
                 });
-                return networkResponse;
             }).catch(() => {
-                // Return fallback if applicable, or just let it fail silently as handled by response ||
+                // Ignore fallos de red aquí
             });
 
-            return response || fetchPromise;
+            return cachedResponse || fetchPromise;
         })
     );
 });
