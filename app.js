@@ -545,7 +545,8 @@ function renderRecords() {
         const coords = r.coords || {};
 
         // --- chip helpers ---
-        const chipStyle = (val, maxScale) => {
+        const chipStyle = (valStr, maxScale) => {
+            const val = parseInt(valStr, 10);
             let cat = 'high'; // default red
             if (maxScale === 9) {
                 if (val <= 3) cat = 'low';
