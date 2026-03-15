@@ -1,11 +1,12 @@
-const CACHE_NAME = 'abc-rice-v7';
+const CACHE_NAME = 'abc-rice-v8';
 const ASSETS = [
     './',
     './index.html',
     './style.css',
     './app.js',
     './manifest.json',
-    './icon-512.png'
+    './icon-512.png',
+    './logo.png'
 ];
 
 self.addEventListener('install', event => {
