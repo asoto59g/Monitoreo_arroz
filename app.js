@@ -9,6 +9,7 @@ const APP_STATE = {
         fincas: JSON.parse(localStorage.getItem('abc_fincas') || '[]'),
         lotes: JSON.parse(localStorage.getItem('abc_lotes') || '[]'),
         ciclos: JSON.parse(localStorage.getItem('abc_ciclos') || '[]'),
+        lotesHistoricos: JSON.parse(localStorage.getItem('abc_lotes_historicos') || '[]'),
     },
     monitoring: {
         coords: null,
@@ -39,6 +40,7 @@ function saveData() {
     localStorage.setItem('abc_fincas', JSON.stringify(APP_STATE.collections.fincas));
     localStorage.setItem('abc_lotes', JSON.stringify(APP_STATE.collections.lotes));
     localStorage.setItem('abc_ciclos', JSON.stringify(APP_STATE.collections.ciclos));
+    localStorage.setItem('abc_lotes_historicos', JSON.stringify(APP_STATE.collections.lotesHistoricos));
 }
 
 const PEST_DB = {
@@ -492,11 +494,11 @@ function updateLotesSugeridos() {
         return;
     }
 
-    // Filtrar lotes históricos de esta finca
-    const lotesFinca = APP_STATE.collections.lotes.filter(l => l.fincaId === fincaId);
+    // Filtrar lotes de la Bóveda Histórica para esta finca
+    const lotesHistoricoFinca = APP_STATE.collections.lotesHistoricos.filter(l => l.fincaId === fincaId);
     
-    // Obtener nombres únicos usando Set
-    const nombresUnicos = [...new Set(lotesFinca.map(l => l.nombre))].sort();
+    // Obtener nombres únicos usando Set (y ordenar alfabéticamente)
+    const nombresUnicos = [...new Set(lotesHistoricoFinca.map(l => l.nombre))].sort();
     
     // Llenar datalist
     datalist.innerHTML = nombresUnicos.map(nombre => `<option value="${nombre}">`).join('');
@@ -542,14 +544,43 @@ function addItemLote() {
 
     if (!nombreInput || !nombreInput.value || !cicloInput.value || !fincaInput.value) return;
 
+    const loteNombreTrimmed = nombreInput.value.trim();
+
+    // 1. Validar que no exista un lote duplicado en el MISMO ciclo y MISMA finca
+    const isDuplicate = APP_STATE.collections.lotes.some(
+        l => l.nombre.toLowerCase() === loteNombreTrimmed.toLowerCase() && 
+             l.cicloId === cicloInput.value && 
+             l.fincaId === fincaInput.value
+    );
+
+    if (isDuplicate) {
+        alert("ALERTA: Este lote ya se encuentra registrado para esta Finca en este Ciclo. No se puede duplicar.");
+        return;
+    }
+
+    // 2. Guardar el lote en el ciclo activo
     APP_STATE.collections.lotes.push({
         id: Date.now().toString(),
-        nombre: nombreInput.value,
+        nombre: loteNombreTrimmed,
         cicloId: cicloInput.value,
         fincaId: fincaInput.value,
         area: areaInput.value,
         variedad: variedadInput.value
     });
+
+    // 3. Guardar el nombre en el Historial Permanente (si no existe ya para esta finca)
+    const isHistoric = APP_STATE.collections.lotesHistoricos.some(
+        h => h.nombre.toLowerCase() === loteNombreTrimmed.toLowerCase() && 
+             h.fincaId === fincaInput.value
+    );
+
+    if (!isHistoric) {
+        APP_STATE.collections.lotesHistoricos.push({
+            nombre: loteNombreTrimmed,
+            fincaId: fincaInput.value
+        });
+    }
+
     saveData();
     renderView('admin_lotes');
 }
