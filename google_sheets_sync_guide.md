@@ -39,6 +39,12 @@ function appendRecord(sheet, r) {
     g.poblacion, g.altura, g.lamina, g.fenologia
   ]);
 }
+
+function testSheet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  sheet.appendRow(["TEST", new Date(), "Prueba de conexión exitosa"]);
+  Logger.log("Fila de prueba añadida correctamente.");
+}
 ```
 
 2. Haga clic en **Guardar** y luego en **Ejecutar** seleccionando la función **`testSheet`** (arriba, al lado del botón Ejecutar) para dar permisos.

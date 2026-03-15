@@ -334,6 +334,15 @@ function renderAdmin() {
             <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
         </div>
 
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(239,68,68,0.07),rgba(153,27,27,0.04)); border-color: rgba(239,68,68,0.15);" onclick="confirmDeleteSynced()">
+            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#dc2626,#991b1b);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🧹</div>
+            <div>
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Limpieza de Datos</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem;">Borrar registros ya sincronizados</p>
+            </div>
+            <i data-lucide="trash-2" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
+        </div>
+
         <div class="card" style="margin-top: 1.5rem; border-color: rgba(255, 255, 255, 0.05);">
             <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
                 <div class="card-icon" style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"><i data-lucide="user"></i></div>
@@ -587,6 +596,26 @@ function deleteItem(collection, id) {
     APP_STATE.collections[collection] = APP_STATE.collections[collection].filter(i => i.id !== id);
     saveData();
     renderView('admin_' + collection);
+}
+
+function confirmDeleteSynced() {
+    const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+    const syncedCount = records.filter(r => r.synced).length;
+    
+    if (syncedCount === 0) {
+        alert("No hay registros sincronizados para borrar.");
+        return;
+    }
+
+    if (confirm(`¿Desea borrar permanentemente los ${syncedCount} registros que ya fueron sincronizados al Excel?`)) {
+        const remaining = records.filter(r => !r.synced);
+        localStorage.setItem('abc_monitoring_records', JSON.stringify(remaining));
+        if (remaining.length === 0) {
+            localStorage.setItem('abc_record_counter', '0');
+        }
+        alert(`✅ Se han borrado ${syncedCount} registros.`);
+        renderView('admin');
+    }
 }
 
 function renderRecords() {
@@ -1400,7 +1429,7 @@ function saveAndFinish() {
         return;
     }
 
-    APP_STATE.monitoring.growth = { poblacion, altura, agua, fenologia };
+    APP_STATE.monitoring.growth = { poblacion, altura, lamina: agua, fenologia };
 
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
 
@@ -1501,13 +1530,18 @@ async function syncWithGoogleSheets() {
             body: JSON.stringify(toSync)
         });
 
-        // Borrar localmente los registros que fueron sincronizados
-        const remainingRecords = records.filter(r => !toSync.some(ts => ts.id === r.id));
-        localStorage.setItem('abc_monitoring_records', JSON.stringify(remainingRecords));
-        localStorage.setItem('abc_record_counter', '0'); // Reiniciar autonúmero
+        // Marcar localmente los registros como sincronizados en lugar de borrarlos
+        toSync.forEach(ts => {
+            const index = records.findIndex(r => r.id === ts.id);
+            if (index !== -1) {
+                records[index].synced = true;
+                records[index].syncedAt = new Date().toISOString();
+            }
+        });
+        localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
 
-        alert(`✅ Sincronización exitosa: ${toSync.length} registros enviados y eliminados del dispositivo.`);
-        renderView(APP_STATE.currentView);
+        alert(`✅ Sincronización enviada: ${toSync.length} registros procesados.`);
+        renderView('records'); // Ir a registros para ver el estado
     } catch (error) {
         console.error('Error en sincronización:', error);
         alert('No se pudo conectar con el servidor. Verifique que el script esté publicado correctamente como "Cualquier persona".');
