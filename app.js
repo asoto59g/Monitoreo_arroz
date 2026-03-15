@@ -233,12 +233,12 @@ function renderDashboard() {
     const pending = records.filter(r => !r.synced).length;
 
     return `
-        <div class="card" style="margin-top: 1rem; background: linear-gradient(135deg, rgba(0,242,254,0.08), rgba(59,130,246,0.05)); border-color: rgba(0,242,254,0.15);">
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#00c6fb,#005bea);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🌾</div>
-                <div>
-                    <h1 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Hola, ${APP_STATE.user?.name || 'Plaguero'} 👋</h1>
-                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Sistema de Monitoreo de Plagas</p>
+        <div class="card" style="margin-top: 1rem; background: linear-gradient(135deg, rgba(0,242,254,0.08), rgba(59,130,246,0.05)); border-color: rgba(0,242,254,0.15); width: 100%;">
+            <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                <p style="color: var(--text-primary); font-size: 1.6rem; font-weight: 800; line-height: 1.1;">Sistema de Monitoreo de Plagas</p>
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <span style="font-size: 1.2rem;">🌾</span>
+                    <h2 style="font-size: 1.1rem; color: var(--text-secondary); margin: 0; font-weight: 500;">Hola, ${APP_STATE.user?.name || 'Plaguero'} 👋</h2>
                 </div>
             </div>
         </div>
@@ -251,17 +251,15 @@ function renderDashboard() {
             <button class="btn btn-primary" style="width: 100%; box-shadow: 0 4px 20px rgba(0, 242, 254, 0.35); font-size:1rem;" onclick="startMonitoring()">🚀 INICIAR MONITOREO</button>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center; background: linear-gradient(135deg,rgba(59,130,246,0.08),rgba(37,99,235,0.04));">
-                <div style="font-size:1.6rem;margin-bottom:0.4rem;">📊</div>
-                <p style="font-size:0.65rem; color: var(--text-secondary); margin-bottom: 0.3rem;font-weight:700;letter-spacing:1px;">TOTAL</p>
-                <p style="font-size: 1.5rem; font-weight: 800;">${records.length}</p>
+        <div class="card" style="margin-bottom: 1rem; padding: 0.8rem 1.2rem; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg,${pending>0?'rgba(245,158,11,0.08)':'rgba(16,185,129,0.08)'},transparent);">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <div style="font-size:1.6rem;">${pending > 0 ? '⏳' : '✅'}</div>
+                <div>
+                    <p style="font-size:0.7rem; color: var(--text-secondary); margin-bottom: 0.1rem; font-weight:700; letter-spacing:1px;">REGISTROS PENDIENTES</p>
+                    <p style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;">Listos para sincronizar</p>
+                </div>
             </div>
-            <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center; background: linear-gradient(135deg,${pending>0?'rgba(245,158,11,0.08)':'rgba(16,185,129,0.08)'},transparent);">
-                <div style="font-size:1.6rem;margin-bottom:0.4rem;">${pending > 0 ? '⏳' : '✅'}</div>
-                <p style="font-size:0.65rem; color: var(--text-secondary); margin-bottom: 0.3rem;font-weight:700;letter-spacing:1px;">PENDIENTES</p>
-                <p style="font-size: 1.5rem; font-weight: 800; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
-            </div>
+            <p style="font-size: 1.8rem; font-weight: 800; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
         </div>
 
         <div class="card" style="padding: 1.2rem; border-color: ${pending > 0 ? 'var(--accent-emerald)' : 'var(--glass-border)'};">
@@ -468,7 +466,7 @@ function renderAdminLotes() {
                     <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
                         <div>
                             <span style="font-weight: 700; display: block;">${l.nombre}</span>
-                            <span style="font-size: 0.7rem; color: var(--text-secondary);">${ciclo} • ${finca}</span>
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">${ciclo} • ${finca} ${l.variedad ? '• ' + l.variedad : ''} • ${l.area || '0'} Ha</span>
                         </div>
                         <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('lotes', '${l.id}', 'admin_lotes')">
                             <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
