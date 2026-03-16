@@ -1527,7 +1527,10 @@ async function syncWithGoogleSheets() {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(toSync)
+            body: JSON.stringify(toSync.map(r => ({
+                ...r,
+                user: r.user || APP_STATE.user // Asegurar datos de usuario en registros viejos
+            })))
         });
 
         // Marcar localmente los registros como sincronizados en lugar de borrarlos
