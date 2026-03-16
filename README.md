@@ -170,8 +170,8 @@ Esta PWA puede instalarse en cualquier dispositivo móvil sin necesidad de tiend
 4. Presione **Sincronizar**.
 5. Pegue la **URL del Google Script** cuando se le solicite. Este solo prueba
 
+https://script.google.com/macros/s/AKfycbxqg_ZNkjEH2Bx73aZnsqMIAGd_9c2ChMHeEWO5dAcOUbGVIbVnL57JLNWUDmdYpfv7/exec
 
-https://script.google.com/macros/s/AKfycbyPUlfjgDJnAw35h1QFYQY85HeC6LSm1k_cv22yKcaDX9UjBGAGQmWFLvux7gHrMftM/exec
 
 ---
 
