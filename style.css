@@ -554,6 +554,24 @@ body {
     background: rgba(255,255,255,0.18);
 }
 
+/* Inverted Levels for Beneficials */
+.inverted-levels .level-card.bajo .level-icon-wrap {
+    background: rgba(239, 68, 68, 0.12);
+}
+.inverted-levels .level-card.alto .level-icon-wrap {
+    background: rgba(16, 185, 129, 0.12);
+}
+.inverted-levels .level-card.active.bajo {
+    background: linear-gradient(145deg, #dc2626, #b91c1c) !important;
+    border-color: #ef4444;
+    box-shadow: 0 0 28px rgba(239, 68, 68, 0.55);
+}
+.inverted-levels .level-card.active.alto {
+    background: linear-gradient(145deg, #059669, #047857) !important;
+    border-color: #10b981;
+    box-shadow: 0 0 28px rgba(16, 185, 129, 0.55);
+}
+
 .level-card.active small {
     opacity: 0.85;
 }

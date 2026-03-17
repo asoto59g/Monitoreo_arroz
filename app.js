@@ -830,7 +830,7 @@ function renderRecords() {
         const coords = r.coords || {};
 
         // --- chip helpers ---
-        const chipStyle = (valStr, maxScale) => {
+        const chipStyle = (valStr, maxScale, isInverted) => {
             const val = parseInt(valStr, 10);
             let cat = 'high'; // default red
             if (maxScale === 9) {
@@ -845,18 +845,25 @@ function renderRecords() {
                 else if (pct <= 0.67) cat = 'medium';
             }
             
+            // Invert colors for beneficials if requested
+            if (isInverted) {
+                if (cat === 'low') cat = 'high';
+                else if (cat === 'high') cat = 'low';
+            }
+
             if (cat === 'low') return 'background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.5);color:#10b981;';
             if (cat === 'medium') return 'background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);color:#f59e0b;';
             return 'background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#ef4444;';
         };
-        const chip = (label, val, maxScale) =>
-            `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.18rem 0.5rem;border-radius:99px;${chipStyle(val,maxScale)}font-size:0.65rem;font-weight:700;margin:0.15rem;">${label}&nbsp;<strong>${val}</strong></span>`;
+        const chip = (label, val, maxScale, isInverted) =>
+            `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.18rem 0.5rem;border-radius:99px;${chipStyle(val,maxScale,isInverted)}font-size:0.65rem;font-weight:700;margin:0.15rem;">${label}&nbsp;<strong>${val}</strong></span>`;
 
         // --- Plagas ---
         const allPestNames = {};
+        const beneficialIds = new Set((PEST_DB.beneficials||[]).map(p => p.id));
         [...(PEST_DB.invertebrates||[]),...(PEST_DB.vertebrates||[]),...(PEST_DB.beneficials||[])].forEach(p=>allPestNames[p.id]=p.name);
         const pestChips = Object.entries(r.pests||{}).filter(([,v])=>v>0)
-            .map(([id,val])=>chip(allPestNames[id]||id, val, 3)).join('');
+            .map(([id,val])=>chip(allPestNames[id]||id, val, 3, beneficialIds.has(id))).join('');
 
         // --- Enfermedades ---
         const allDiseaseInfo = {};
@@ -1290,13 +1297,13 @@ function renderMonitorPests() {
                             </div>
                         </div>
                         <div class="threshold-indicator" style="margin-bottom: 0;">
-                            <div class="threshold-dot green ${isLow ? 'active' : ''}"></div>
+                            <div class="threshold-dot ${type === 'beneficials' ? 'red' : 'green'} ${isLow ? 'active' : ''}"></div>
                             <div class="threshold-dot yellow ${isMed ? 'active' : ''}"></div>
-                            <div class="threshold-dot red ${isHigh ? 'active' : ''}"></div>
+                            <div class="threshold-dot ${type === 'beneficials' ? 'green' : 'red'} ${isHigh ? 'active' : ''}"></div>
                         </div>
                     </div>
 
-                    <div class="level-selector-premium">
+                    <div class="level-selector-premium ${type === 'beneficials' ? 'inverted-levels' : ''}">
                         <div class="level-card nulo ${currentLevel == 0 ? 'active' : ''}" onclick="setPestLevel('${pest.id}', 0)">
                             <div class="level-icon-wrap">🚫</div>
                             <span>NULO</span>
