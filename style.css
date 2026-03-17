@@ -244,6 +244,59 @@ body {
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 254, 0.1);
 }
 
+.nav-item {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    appearance: none;
+    -webkit-appearance: none;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border-radius: 1.5rem;
+}
+
+.nav-item .nav-icon {
+    font-size: 1.25rem;
+    transition: transform 0.3s;
+}
+
+.nav-item .nav-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-item.active {
+    color: var(--neon-cyan);
+    background: rgba(0, 242, 254, 0.12) !important;
+    box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.1) !important;
+}
+
+.nav-item.active .nav-icon {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.5));
+}
+
+.nav-item.active .nav-label {
+    text-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+}
+
+.nav-item:active {
+    transform: scale(0.92);
+}
+
 /* Neon Pill Buttons (Stadium) */
 .btn {
     padding: 1rem 2rem;
