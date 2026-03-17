@@ -1478,7 +1478,7 @@ function renderMonitorWeeds() {
             <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <div class="weed-icon-badge" onclick="showThreshold('malezas_${currentLevel > 0 ? (currentLevel > 3 ? (currentLevel > 6 ? 'medianas' : 'medianas') : 'pequenas') : 'pequenas'}')">${wEmoji}</div>
+                        <div class="weed-icon-badge" onclick="showThreshold('malezas_${currentLevel >= 7 ? 'grandes' : (currentLevel >= 4 ? 'medianas' : 'pequenas')}')">${wEmoji}</div>
                         <div>
                             <span style="font-weight: 700; font-size: 1rem; letter-spacing: -0.5px; display:block;">${wName}</span>
                             <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Densidad (0-9)</div>
@@ -1791,8 +1791,13 @@ function saveRegistration() {
 
 // Threshold Modal System
 function showThreshold(id) {
+    console.log('Solicitando umbral para:', id);
     const data = THRESHOLDS_DATA[id];
-    if (!data) return;
+    if (!data) {
+        console.error('No threshold data for ID:', id);
+        // alert('Sin datos para: ' + id);
+        return;
+    }
 
     // Remove existing if any
     const existing = document.getElementById('threshold-modal');
@@ -1872,7 +1877,7 @@ if (!document.getElementById('threshold-styles')) {
             box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
         .pest-icon-badge::after, .disease-icon-badge::after, .weed-icon-badge::after {
-            content: "ℹ️";
+            content: "\\2139\\FE0F";
             position: absolute;
             top: -5px;
             right: -5px;
@@ -1885,6 +1890,7 @@ if (!document.getElementById('threshold-styles')) {
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: none; /* Make sure it doesn't block the click */
         }
 
         .threshold-modal-overlay {
@@ -1936,3 +1942,5 @@ if (!document.getElementById('threshold-styles')) {
     `;
     document.head.appendChild(styles);
 }
+
+console.log('Sistema de Umbrales inyectado correctamente.');
