@@ -438,7 +438,7 @@ function renderDashboard() {
             </div>
             
             <div class="card action-container">
-                <div class="action-main" onclick="renderView('monitor_header')">
+                <div class="action-main" onclick="startMonitoring()">
                     <div class="action-icon-rocket">🚀</div>
                     <span class="action-label">INICIAR MONITOREO</span>
                 </div>
