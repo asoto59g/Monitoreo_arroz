@@ -180,8 +180,32 @@ const THRESHOLDS_DATA = {
         rows: [{ cond: "Cant/m2", n1: "<= 2", n2: "> 2 y < 3", n3: ">= 3", obs: "" }]
     },
     ratas: {
-        name: "Ratas/Aves",
-        rows: [{ cond: "Daño en area", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+        name: "Ratas",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
+    },
+    gallito: {
+        name: "Gallito Azul",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
+    },
+    piches: {
+        name: "Piches",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
+    },
+    piuses: {
+        name: "Piuses",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
+    },
+    sargento: {
+        name: "Sargento",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
+    },
+    zarseta: {
+        name: "Zarseta",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
+    },
+    zanate: {
+        name: "Zanate",
+        rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
     },
     beneficos: {
         name: "Benéficos (Pentatómidos, Libélulas, Arañas...)",
