@@ -25,14 +25,11 @@
 
 body {
     font-family: 'Outfit', sans-serif;
-    background-color: var(--bg-dark);
+    background-color: transparent; /* Permite ver el fondo de la nebulosa sin obstrucción */
     color: var(--text-primary);
     overflow: hidden;
     height: 100vh;
     width: 100vw;
-    background-image: 
-        radial-gradient(circle at 20% 30%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
 }
 
 /* Enhanced Background Nebula Effect */
@@ -42,18 +39,18 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -1;
+    z-index: -2;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+    background: radial-gradient(circle at 50% 50%, #0a1128 0%, #010409 100%);
 }
 
 .bg-blobs::before {
     content: '';
     position: absolute;
-    width: 350%;
-    height: 350%;
-    top: -125%;
-    left: -125%;
+    width: 400%;
+    height: 400%;
+    top: -150%;
+    left: -150%;
     background-image: 
         radial-gradient(4px 4px at 20px 30px, #fff, rgba(0,0,0,0)),
         radial-gradient(6px 6px at 40px 70px, #fff, rgba(0,0,0,0)),
@@ -62,9 +59,9 @@ body {
         radial-gradient(4px 4px at 130px 80px, #fff, rgba(0,0,0,0)),
         radial-gradient(8px 8px at 160px 120px, #fff, rgba(0,0,0,0));
     background-repeat: repeat;
-    background-size: 500px 500px;
-    opacity: 0.55;
-    animation: rotate 120s linear infinite;
+    background-size: 600px 600px;
+    opacity: 0.85; /* Estrellas muy brillantes */
+    animation: rotate 100s linear infinite;
 }
 
 @keyframes rotate {
@@ -75,35 +72,45 @@ body {
 .blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(150px);
-    opacity: 0.65;
-    animation: float 25s infinite alternate ease-in-out;
+    filter: blur(120px);
+    opacity: 0.8;
+    animation: float 20s infinite alternate ease-in-out;
 }
 
 .blob-1 {
-    width: 2000px;
-    height: 2000px;
-    background: radial-gradient(circle, var(--accent-emerald) 0%, transparent 60%);
-    top: -500px;
-    left: -500px;
+    width: 1800px;
+    height: 1800px;
+    background: radial-gradient(circle, var(--accent-emerald) 0%, var(--accent-emerald) 25%, transparent 70%);
+    top: -400px;
+    left: -400px;
 }
 
 .blob-2 {
-    width: 1800px;
-    height: 1800px;
-    background: radial-gradient(circle, var(--accent-blue) 0%, transparent 60%);
-    bottom: -200px;
-    right: -400px;
-    animation-delay: -7s;
+    width: 1600px;
+    height: 1600px;
+    background: radial-gradient(circle, var(--accent-blue) 0%, var(--accent-blue) 25%, transparent 70%);
+    bottom: -100px;
+    right: -300px;
+    animation-delay: -5s;
 }
 
 .blob-3 {
-    width: 1500px;
-    height: 1500px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.6) 0%, transparent 60%);
-    top: 25%;
-    left: 30%;
-    animation: float 35s infinite alternate ease-in-out;
+    width: 1400px;
+    height: 1400px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.7) 0%, rgba(139, 92, 246, 0.5) 20%, transparent 70%);
+    top: 20%;
+    left: 20%;
+    animation-delay: -10s;
+}
+
+.blob-4 {
+    width: 1200px;
+    height: 1200px;
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.6) 0%, transparent 60%);
+    bottom: 10%;
+    left: 50%;
+    animation: float 30s infinite alternate ease-in-out;
+    animation-delay: -15s;
 }
 
 @keyframes float {
