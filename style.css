@@ -244,26 +244,27 @@ body {
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 254, 0.1);
 }
 
-.nav-item {
-    background: transparent !important;
+nav.bottom-nav .nav-item {
+    background: none !important;
     background-color: transparent !important;
     background-image: none !important;
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
-    appearance: none;
-    -webkit-appearance: none;
-    color: var(--text-secondary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    border-radius: 1.5rem;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    color: var(--text-secondary) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    padding: 0.5rem 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    border-radius: 1.5rem !important;
+    min-width: 60px !important;
 }
 
 .nav-item .nav-icon {
@@ -278,9 +279,10 @@ body {
     letter-spacing: 0.5px;
 }
 
-.nav-item.active {
-    color: var(--neon-cyan);
+nav.bottom-nav .nav-item.active {
+    color: var(--neon-cyan) !important;
     background: transparent !important;
+    background-color: transparent !important;
 }
 
 .nav-item.active .nav-icon {
