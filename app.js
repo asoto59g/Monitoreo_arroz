@@ -105,15 +105,178 @@ const WEED_DB = [
     "Heterantera", "Amarantus", "Esfenoclea"
 ];
 
-const THRESHOLDS = {
+const THRESHOLDS_DATA = {
+    // PLAGAS
     spodoptera: {
-        stages: [
-            { cond: "Arroz < 20 ddg", levels: [1, 3, 3] },
-            { cond: "Arroz > 20 y < 45 ddg", levels: [6, 10, 10] },
-            { cond: "Arroz > 45 ddg", levels: [10, 15, 15] }
+        name: "Spodoptera",
+        rows: [
+            { cond: "Arroz < 20 ddg", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "cant/m2" },
+            { cond: "Arroz > 20 y < 45 ddg", n1: "<= 6", n2: "> 6 y < 10", n3: ">= 10", obs: "" },
+            { cond: "Arroz > 45 ddg", n1: "<= 10", n2: "> 10 y < 15", n3: ">= 15", obs: "" }
         ]
+    },
+    sogata: {
+        name: "Sogata",
+        rows: [{ cond: "Variedades resistente VHB", n1: "<= 10", n2: "> 10 y < 20", n3: ">= 20", obs: "" }]
+    },
+    mocis: {
+        name: "Mocis",
+        rows: [
+            { cond: "Arroz < 20 ddg", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "" },
+            { cond: "Arroz > 20 y < 45 ddg", n1: "<= 4", n2: "> 4 y < 6", n3: ">= 6", obs: "" },
+            { cond: "Arroz > 45 ddg", n1: "<= 6", n2: "> 6 y < 10", n3: ">= 10", obs: "" }
+        ]
+    },
+    oebalus: {
+        name: "Oebalus",
+        rows: [
+            { cond: "Arroz en grano leche", n1: "<= 2", n2: "> 2 y < 3", n3: ">= 3", obs: "" },
+            { cond: "Arroz en grano masa", n1: "<= 3", n2: "> 3 y < 4", n3: ">= 4", obs: "" },
+            { cond: "Arroz en grano duro", n1: "N/A", n2: "N/A", n3: "N/A", obs: "No aplicar" }
+        ]
+    },
+    tibraca: {
+        name: "Tibraca",
+        rows: [{ cond: "Ninfas + adultos", n1: "<= 1", n2: "> 1 y < 2", n3: ">= 2", obs: "" }]
+    },
+    minador: {
+        name: "Minador",
+        rows: [{ cond: "Sintomas en plantas", n1: "<= 3", n2: "> 3 y < 5", n3: ">= 5", obs: "" }]
+    },
+    acarospinki: {
+        name: "Acaro Spinki",
+        rows: [{ cond: "En vaina 1", n1: "<= 3", n2: "> 3 y < 4", n3: ">= 4", obs: "" }]
+    },
+    rupella: {
+        name: "Rupella",
+        rows: [{ cond: "Conteo de adultos/m2", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "" }]
+    },
+    salton: {
+        name: "Salton",
+        rows: [{ cond: "Mayor problema en floracion", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "" }]
+    },
+    tetranychus: {
+        name: "Tetranychus",
+        rows: [{ cond: "Daño en area foliar", n1: "<= 2%", n2: "> 2% y < 5%", n3: ">= 5%", obs: "" }]
+    },
+    afidos: {
+        name: "Afidos",
+        rows: [{ cond: "Daño en area foliar", n1: "<= 2%", n2: "> 2% y < 5%", n3: ">= 5%", obs: "" }]
+    },
+    nematodos: {
+        name: "Nematodos",
+        rows: [{ cond: "Nodulos por planta", n1: "<= 2", n2: "> 2 y < 5", n3: ">= 5", obs: "" }]
+    },
+    marasmia: {
+        name: "Marasmia",
+        rows: [{ cond: "Cant/m2", n1: "<= 1", n2: "> 1 y < 2", n3: ">= 2", obs: "" }]
+    },
+    diatrea: {
+        name: "Diatrea",
+        rows: [{ cond: "Cant/m2", n1: "<= 1", n2: "> 1 y < 2", n3: ">= 2", obs: "" }]
+    },
+    gorgojo: {
+        name: "Gorgojo Agua",
+        rows: [{ cond: "Cant/m2", n1: "<= 2", n2: "> 2 y < 3", n3: ">= 3", obs: "" }]
+    },
+    ratas: {
+        name: "Ratas/Aves",
+        rows: [{ cond: "Daño en area", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+    beneficos: {
+        name: "Benéficos (Pentatómidos, Libélulas, Arañas...)",
+        rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Primer grupo: organismos depredadores. Segundo: parasitoides. Tercero: hongos." }]
+    },
+
+    // ENFERMEDADES
+    rizoctonia: {
+        name: "Rizoctonia",
+        rows: [
+            { cond: "Rizoc. 3er tercio", n1: "7", n2: "8", n3: "9", obs: "Severidad definida por ubicación" },
+            { cond: "Rizoc. 2do tercio", n1: "4", n2: "5", n3: "6", obs: "de signos" },
+            { cond: "Rizoc. 1er tercio", n1: "1", n2: "2", n3: "3", obs: "Incidencia definida por cantidad" }
+        ]
+    },
+    dreslera: {
+        name: "Dreslera",
+        rows: [{ cond: "Daño en area foliar", n1: "<= 2%", n2: "> 2% y < 4%", n3: ">= 4%", obs: "" }]
+    },
+    helminstosporium: {
+        name: "Helminstosporium",
+        rows: [{ cond: "Daño en area foliar", n1: "<= 2%", n2: "> 2% y < 4%", n3: ">= 4%", obs: "" }]
+    },
+    burkholderia: {
+        name: "Burkholderia",
+        rows: [{ cond: "Evaluacion en panicula", n1: "No pres.", n2: "Presente", n3: "-", obs: "Una vez emergida" }]
+    },
+    hojablanca: {
+        name: "Hoja Blanca",
+        rows: [{ cond: "En variedades suceptibles", n1: "<= 1%", n2: "1%", n3: ">= 1%", obs: "" }]
+    },
+    manchadograno: {
+        name: "Manchado Grano",
+        rows: [{ cond: "Granos manchados", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+    falsocarbon: {
+        name: "Falso Carbon",
+        rows: [{ cond: "Paniculas afectadas", n1: "<= 2%", n2: "> 2% y < 4%", n3: ">= 4%", obs: "" }]
+    },
+    piriculariaf: {
+        name: "Piricularia Follaje",
+        rows: [{ cond: "Daño en area foliar", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+    piriculariac: {
+        name: "Piricularia Cuello",
+        rows: [{ cond: "Paniculas afectadas", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+    sarocladium: {
+        name: "Sarocladium",
+        rows: [{ cond: "Vaina foliar", n1: "No hay les.", n2: "Incipientes", n3: "Muchas les.", obs: "" }]
+    },
+    pseudomonas: {
+        name: "Pseudomonas",
+        rows: [{ cond: "Vaina y hoja bandera", n1: "No hay les.", n2: "Incipientes", n3: "Muchas les.", obs: "" }]
+    },
+    xhantomonas: {
+        name: "Xhantomonas",
+        rows: [{ cond: "Daño sintomas area foliar", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+    erwinia: {
+        name: "Erwinia",
+        rows: [{ cond: "Daño sintomas area foliar", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+    richosporium: {
+        name: "Richosporium",
+        rows: [{ cond: "Daño sintomas area foliar", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
+    },
+
+    // MALEZAS
+    malezas_grandes: {
+        name: "Malezas Grandes (Mas 4 hojas)",
+        rows: [{ cond: "Densidad/m2", n1: "3", n2: "6", n3: "9", obs: "" }]
+    },
+    malezas_medianas: {
+        name: "Malezas Medianas (2 a 4 hojas)",
+        rows: [{ cond: "Densidad/m2", n1: "2", n2: "5", n3: "8", obs: "" }]
+    },
+    malezas_pequenas: {
+        name: "Malezas Pequeñas (Menos 2 hojas)",
+        rows: [{ cond: "Densidad/m2", n1: "1", n2: "4", n3: "7", obs: "" }]
+    },
+
+    // CRECIMIENTO
+    poblacion: {
+        name: "Población",
+        rows: [{ cond: "Inicio a Macollamiento", n1: "Medir", n2: "Medir", n3: "Medir", obs: "Generalmente al inicio del ciclo (máx macollamiento) y en floración." }]
+    },
+    altura: {
+        name: "Altura Planta",
+        rows: [{ cond: "Suelo a hoja estirada", n1: "cm", n2: "cm", n3: "cm", obs: "Por ejemplo una altura promedio medida de 12.5cm, la casilla a marcar es la de 10cm." }]
+    },
+    lamina: {
+        name: "Lámina de Agua",
+        rows: [{ cond: "Desde el suelo", n1: "cm", n2: "cm", n3: "cm", obs: "Por ejemplo una altura medida de 3.40cm, la casilla a marcar es la de 2cm." }]
     }
-    // ... more thresholds to be added
 };
 
 // Initialization
@@ -1084,7 +1247,7 @@ function renderMonitorPests() {
                 <div id="pest-${pest.id}" class="card" style="padding: 1.25rem; margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <div class="pest-icon-badge" style="background:${iconInfo.bg};border:1px solid ${iconInfo.border};">
+                            <div class="pest-icon-badge" style="background:${iconInfo.bg};border:1px solid ${iconInfo.border};" onclick="showThreshold('${pest.id}')">
                                 ${iconInfo.emoji}
                             </div>
                             <div>
@@ -1208,7 +1371,7 @@ function renderMonitorDiseases() {
             <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <div class="disease-icon-badge">${dEmoji}</div>
+                        <div class="disease-icon-badge" onclick="showThreshold('${d.id}')">${dEmoji}</div>
                         <div>
                             <span style="font-weight: 700; font-size: 1rem; letter-spacing: -0.5px; display:block;">${d.name}</span>
                             <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1315,7 +1478,7 @@ function renderMonitorWeeds() {
             <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <div class="weed-icon-badge">${wEmoji}</div>
+                        <div class="weed-icon-badge" onclick="showThreshold('malezas_${currentLevel > 0 ? (currentLevel > 3 ? (currentLevel > 6 ? 'medianas' : 'medianas') : 'pequenas') : 'pequenas'}')">${wEmoji}</div>
                         <div>
                             <span style="font-weight: 700; font-size: 1rem; letter-spacing: -0.5px; display:block;">${wName}</span>
                             <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Densidad (0-9)</div>
@@ -1382,15 +1545,15 @@ function renderMonitorGrowth() {
         <div class="monitoring-scroll">
             <div class="card">
                 <div class="field-group">
-                    <label>Población (plantas/m2)</label>
+                    <label onclick="showThreshold('poblacion')" style="cursor:pointer; text-decoration:underline;">Población (plantas/m2) ℹ️</label>
                     <input type="number" id="mon-poblacion" class="input-modern" value="${APP_STATE.monitoring.growth.poblacion || ''}" placeholder="Ej: 250">
                 </div>
                 <div class="field-group">
-                    <label>Altura Planta (cm)</label>
+                    <label onclick="showThreshold('altura')" style="cursor:pointer; text-decoration:underline;">Altura Planta (cm) ℹ️</label>
                     <input type="number" id="mon-altura" class="input-modern" value="${APP_STATE.monitoring.growth.altura || ''}" placeholder="Ej: 45">
                 </div>
                 <div class="field-group">
-                    <label>Lámina de Agua</label>
+                    <label onclick="showThreshold('lamina')" style="cursor:pointer; text-decoration:underline;">Lámina de Agua ℹ️</label>
                     <select id="mon-agua" class="input-modern">
                         <option value="Seco" ${APP_STATE.monitoring.growth.agua === 'Seco' ? 'selected' : ''}>Seco</option>
                         <option value="Saturado" ${APP_STATE.monitoring.growth.agua === 'Saturado' ? 'selected' : ''}>Saturado</option>
@@ -1624,4 +1787,152 @@ function saveRegistration() {
 
     alert('¡Dispositivo registrado con éxito!');
     renderView('dashboard');
+}
+
+// Threshold Modal System
+function showThreshold(id) {
+    const data = THRESHOLDS_DATA[id];
+    if (!data) return;
+
+    // Remove existing if any
+    const existing = document.getElementById('threshold-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'threshold-modal';
+    modal.className = 'threshold-modal-overlay';
+    
+    let rowsHtml = data.rows.map(row => `
+        <tr>
+            <td>${row.cond}</td>
+            <td style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">${row.n1}</td>
+            <td style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-weight: 700;">${row.n2}</td>
+            <td style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700;">${row.n3}</td>
+            <td style="font-size: 0.75rem; opacity: 0.8;">${row.obs}</td>
+        </tr>
+    `).join('');
+
+    modal.innerHTML = `
+        <div class="threshold-modal-card">
+            <div class="threshold-header">
+                <div>
+                    <h3 style="margin:0; font-size:1.1rem; color:#fff;">Umbrales: ${data.name}</h3>
+                    <p style="margin:0; font-size:0.8rem; color:#94a3b8;">Guía de niveles para el control</p>
+                </div>
+                <button class="close-modal" onclick="hideThreshold()">×</button>
+            </div>
+            <div class="threshold-body">
+                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table class="threshold-table">
+                        <thead>
+                            <tr>
+                                <th>Condición</th>
+                                <th>Nivel 1</th>
+                                <th>Nivel 2</th>
+                                <th>Nivel 3</th>
+                                <th>Obs.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="threshold-footer">
+                <button class="btn btn-primary" style="width: 100%;" onclick="hideThreshold()">ENTENDIDO</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function hideThreshold() {
+    const modal = document.getElementById('threshold-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+// Global variable icon CSS & Threshold Modal CSS
+if (!document.getElementById('threshold-styles')) {
+    const styles = document.createElement('style');
+    styles.id = 'threshold-styles';
+    styles.innerHTML = `
+        .pest-icon-badge, .disease-icon-badge, .weed-icon-badge {
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pest-icon-badge:hover, .disease-icon-badge:hover, .weed-icon-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        .pest-icon-badge::after, .disease-icon-badge::after, .weed-icon-badge::after {
+            content: "ℹ️";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 10px;
+            background: #1e293b;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .threshold-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000; opacity: 0; transition: opacity 0.3s;
+            padding: 1rem;
+        }
+        .threshold-modal-overlay.active { opacity: 1; }
+        .threshold-modal-card {
+            background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; width: 100%; max-width: 600px;
+            overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            transform: translateY(20px); transition: transform 0.3s;
+            max-height: 90vh; display: flex; flex-direction: column;
+        }
+        .threshold-modal-overlay.active .threshold-modal-card { transform: translateY(0); }
+        .threshold-header {
+            padding: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0;
+        }
+        .close-modal {
+            background: rgba(255,255,255,0.05); border: none; color: #fff;
+            width: 32px; height: 32px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .threshold-body { 
+            padding: 0; 
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .threshold-table {
+            width: 100%; border-collapse: collapse; min-width: 450px;
+        }
+        .threshold-table th {
+            text-align: left; padding: 1rem; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 1px; color: #64748b;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky; top: 0; background: #1e293b;
+        }
+        .threshold-table td {
+            padding: 0.85rem 1rem; font-size: 0.85rem; color: #cbd5e1;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+        .threshold-footer { padding: 1.25rem; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+    `;
+    document.head.appendChild(styles);
 }
