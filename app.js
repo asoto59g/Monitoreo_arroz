@@ -208,9 +208,17 @@ const THRESHOLDS_DATA = {
         rows: [{ cond: "Presencia/Daño", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "Daño en Area" }]
     },
     beneficos: {
-        name: "Benéficos (Pentatómidos, Libélulas, Arañas...)",
-        rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Primer grupo: organismos depredadores. Segundo: parasitoides. Tercero: hongos." }]
+        name: "Benéficos",
+        rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Depredadores / Parasitoides / Hongos" }]
     },
+    pentatomidos: { name: "Pentatómidos", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    libelulas: { name: "Libélulas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    aranas: { name: "Arañas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    mariquitas: { name: "Mariquitas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    crisopas: { name: "Crisopas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    avispas: { name: "Avispas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos parasitoides" }] },
+    parasitacion: { name: "Parasitación", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos parasitoides" }] },
+    hongos: { name: "Hongos Entomopatógenos", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Hongos que controlan plagas" }] },
 
     // ENFERMEDADES
     rizoctonia: {
