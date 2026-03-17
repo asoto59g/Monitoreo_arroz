@@ -1605,10 +1605,10 @@ function renderMonitorGrowth() {
                 </div>
                 <div class="field-group">
                     <label onclick="showThreshold('lamina')" style="cursor:pointer; text-decoration:underline;">Lámina de Agua ℹ️</label>
-                    <select id="mon-agua" class="input-modern">
-                        <option value="Seco" ${APP_STATE.monitoring.growth.agua === 'Seco' ? 'selected' : ''}>Seco</option>
-                        <option value="Saturado" ${APP_STATE.monitoring.growth.agua === 'Saturado' ? 'selected' : ''}>Saturado</option>
-                        <option value="Lámina" ${APP_STATE.monitoring.growth.agua === 'Lámina' ? 'selected' : ''}>Lámina</option>
+                    <select id="mon-lamina" class="input-modern">
+                        <option value="Seco" ${APP_STATE.monitoring.growth.lamina === 'Seco' ? 'selected' : ''}>Seco</option>
+                        <option value="Saturado" ${APP_STATE.monitoring.growth.lamina === 'Saturado' ? 'selected' : ''}>Saturado</option>
+                        <option value="Lámina" ${APP_STATE.monitoring.growth.lamina === 'Lámina' ? 'selected' : ''}>Lámina</option>
                     </select>
                 </div>
                 <div class="field-group">
@@ -1635,7 +1635,7 @@ function renderMonitorGrowth() {
 function saveAndFinish() {
     const poblacion = document.getElementById('mon-poblacion')?.value;
     const altura = document.getElementById('mon-altura')?.value;
-    const agua = document.getElementById('mon-agua')?.value;
+    const agua = document.getElementById('mon-lamina')?.value;
     const fenologia = document.getElementById('mon-fenologia')?.value;
 
     if (!poblacion || !altura || !agua || !fenologia) {
@@ -1809,10 +1809,16 @@ function renderRegistration() {
 
             <div class="field-group">
                 <label>Correo Electrónico</label>
-            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveRegistration()">
+                <div class="input-with-icon">
+                    <i data-lucide="mail"></i>
+                    <input type="email" id="reg-email" class="input-modern" placeholder="Ej: mario@geomatica.com">
+                </div>
+            </div>
+
+            <button class="btn btn-primary registration-btn" onclick="saveRegistration()">
                 REGISTRAR DISPOSITIVO
             </button>
-            <p style="font-size: 0.7rem; color: var(--text-secondary); text-align: center; margin-top: 1.5rem;">
+            <p style="font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: 1.5rem; line-height: 1.4;">
                 La contraseña y validación de seguridad se habilitarán en una fase posterior.
             </p>
         </div>
