@@ -428,107 +428,122 @@ function renderView(viewName, preserveScroll) {
 function renderDashboard() {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     const pending = records.filter(r => !r.synced).length;
+    const userName = APP_STATE.user?.name?.split(' ')[0] || 'Usuario';
 
     return `
-                <div>
-                    <p style="font-size:0.7rem; color: var(--text-secondary); margin-bottom: 0.1rem; font-weight:700; letter-spacing:1px;">REGISTROS PENDIENTES</p>
-                    <p style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;">Listos para sincronizar</p>
+        <div class="dashboard-hero slide-up">
+            <div class="card welcome-card">
+                <h1 class="hero-title">Sistema de Monitoreo de Plagas</h1>
+                <p class="hero-greeting"><span class="emoji-rice">🌾</span> Hola, ${userName} 👋</p>
+            </div>
+            
+            <div class="card action-container">
+                <div class="action-main" onclick="renderView('monitor_header')">
+                    <div class="action-icon-rocket">🚀</div>
+                    <span class="action-label">INICIAR MONITOREO</span>
+                </div>
+                
+                <div class="status-pill ${pending > 0 ? 'has-pending' : ''}">
+                    <div class="status-icon"><i data-lucide="cloud-upload"></i></div>
+                    <div class="status-info">
+                        <strong>${pending} REGISTROS PENDIENTES</strong>
+                        <span>Listos para sincronizar</span>
+                    </div>
                 </div>
             </div>
-            <p style="font-size: 1.8rem; font-weight: 800; color: ${pending > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)'};">${pending}</p>
-        </div>
 
-        <div class="card" style="padding: 1.2rem; border-color: ${pending > 0 ? 'var(--accent-emerald)' : 'var(--glass-border)'};">
-            <button id="sync-btn" class="btn btn-primary" 
-                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" 
-                    onclick="syncWithGoogleSheets()">
-                <i data-lucide="cloud-upload" style="width: 20px; height: 20px;"></i>
-                SINCRONIZAR AHORA
-            </button>
-            <div style="text-align: center; margin-top: 0.8rem;">
-                <a href="#" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: underline; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="localStorage.removeItem('abc_sync_url'); alert('URL borrada. Presione Sincronizar para pegar la nueva.'); renderView('dashboard'); return false;">
-                    <i data-lucide="pincode-locked" style="width: 12px; height: 12px;"></i>
+            <div class="config-link-row">
+                <a href="#" class="config-link" onclick="localStorage.removeItem('abc_sync_url'); alert('URL borrada. Presione Sincronizar para pegar la nueva.'); renderView('dashboard'); return false;">
                     Configurar URL de Script
                 </a>
             </div>
-        </div>
 
-        <div id="pwa-install-container">
-            ${APP_STATE.deferredPrompt ? `
-                <div class="card" style="text-align: center; border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05);">
-                    <p style="font-size: 0.9rem; margin-bottom: 1rem;">📲 Instale la App para acceso rápido.</p>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="installPWA()">INSTALAR APP</button>
-                </div>
-            ` : `
-                <div class="card" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); padding: 1rem;">
-                    <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-emerald);">💡 ¿Cómo instalar esta App?</h4>
-                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
-                        Si no ve el botón, use el menú de su navegador:<br>
-                        <strong>Android:</strong> ⋮ > Instalar app.<br>
-                        <strong>iPhone:</strong> 󰐧 > Agregar a inicio.
-                    </p>
-                </div>
-            `}
+            <div class="sync-section">
+                <button id="sync-btn" class="btn btn-sync-neon" onclick="syncWithGoogleSheets()">
+                    <i data-lucide="cloud-upload"></i> SINCRONIZAR AHORA
+                </button>
+            </div>
+
+            <div id="pwa-install-container">
+                ${APP_STATE.deferredPrompt ? `
+                    <div class="card install-card">
+                        <p>📲 Instale la App para acceso rápido.</p>
+                        <button class="btn btn-primary btn-small" onclick="installPWA()">INSTALAR APP</button>
+                    </div>
+                ` : ''}
+            </div>
         </div>
     `;
 }
 
 function renderAdmin() {
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#00c6fb,#005bea);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">⚙️</div>
-                <h2 style="font-size: 1.25rem;">Administración</h2>
+        <div class="view-header">
+            <div class="header-main">
+                <div class="card-icon"><i data-lucide="settings"></i></div>
+                <h2 class="view-title">Administración</h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('dashboard')">← VOLVER</button>
+            <button class="btn btn-secondary btn-small" onclick="renderView('dashboard')" style="max-width: 100px;">
+                <i data-lucide="arrow-left"></i> VOLVER
+            </button>
         </div>
         
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(0,198,251,0.07),rgba(0,91,234,0.04));" onclick="renderView('admin_ciclos')">
-            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#0891b2,#0e7490);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🔄</div>
-            <div>
-                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Ciclos Agrícolas</h3>
-                <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.ciclos.length} registrados</p>
+        <div class="card admin-menu-card" onclick="renderView('admin_ciclos')">
+            <div class="admin-icon-wrap" style="background: linear-gradient(135deg, #0891b2, #0e7490);">
+                <i data-lucide="refresh-cw"></i>
             </div>
-            <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
+            <div class="admin-text">
+                <h3>Ciclos Agrícolas</h3>
+                <p>${APP_STATE.collections.ciclos.length} registrados</p>
+            </div>
+            <i data-lucide="chevron-right" class="admin-chevron"></i>
         </div>
         
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(245,158,11,0.07),rgba(180,83,9,0.04));" onclick="renderView('admin_fincas')">
-            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#d97706,#b45309);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🏠</div>
-            <div>
-                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Fincas</h3>
-                <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.fincas.length} registradas</p>
+        <div class="card admin-menu-card" onclick="renderView('admin_fincas')">
+            <div class="admin-icon-wrap" style="background: linear-gradient(135deg, #d97706, #b45309);">
+                <i data-lucide="home"></i>
             </div>
-            <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
+            <div class="admin-text">
+                <h3>Fincas</h3>
+                <p>${APP_STATE.collections.fincas.length} registradas</p>
+            </div>
+            <i data-lucide="chevron-right" class="admin-chevron"></i>
         </div>
         
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(16,185,129,0.07),rgba(5,150,105,0.04));" onclick="renderView('admin_lotes')">
-            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#059669,#047857);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🗂️</div>
-            <div>
-                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Lotes / Parcelas</h3>
-                <p style="color: var(--text-secondary); font-size: 0.8rem;">${APP_STATE.collections.lotes.length} registrados</p>
+        <div class="card admin-menu-card" onclick="renderView('admin_lotes')">
+            <div class="admin-icon-wrap" style="background: linear-gradient(135deg, #059669, #047857);">
+                <i data-lucide="layers"></i>
             </div>
-            <i data-lucide="chevron-right" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
+            <div class="admin-text">
+                <h3>Lotes / Parcelas</h3>
+                <p>${APP_STATE.collections.lotes.length} registrados</p>
+            </div>
+            <i data-lucide="chevron-right" class="admin-chevron"></i>
         </div>
 
-        <div class="card" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; padding: 1.25rem; background: linear-gradient(135deg,rgba(239,68,68,0.07),rgba(153,27,27,0.04)); border-color: rgba(239,68,68,0.15);" onclick="confirmDeleteSynced()">
-            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#dc2626,#991b1b);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🧹</div>
-            <div>
-                <h3 style="font-size: 1.05rem; margin-bottom: 0.2rem;">Limpieza de Datos</h3>
-                <p style="color: var(--text-secondary); font-size: 0.8rem;">Borrar registros ya sincronizados</p>
+        <div class="card admin-menu-card danger" onclick="confirmDeleteSynced()">
+            <div class="admin-icon-wrap" style="background: linear-gradient(135deg, #dc2626, #991b1b);">
+                <i data-lucide="trash-2"></i>
             </div>
-            <i data-lucide="trash-2" style="margin-left: auto; width: 18px; color: var(--text-secondary); opacity: 0.5;"></i>
+            <div class="admin-text">
+                <h3>Limpieza de Datos</h3>
+                <p>Borrar registros sincronizados</p>
+            </div>
+            <i data-lucide="chevron-right" class="admin-chevron"></i>
         </div>
 
-        <div class="card" style="margin-top: 1.5rem; border-color: rgba(255, 255, 255, 0.05);">
-            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
-                <div class="card-icon" style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"><i data-lucide="user"></i></div>
-                <div>
-                    <h4 style="font-size: 1rem;">${APP_STATE.user?.name || 'Usuario'}</h4>
-                    <p style="font-size: 0.75rem; color: var(--text-secondary);">${APP_STATE.user?.email || 'No registrado'}</p>
+        <div class="card user-profile-card">
+            <div class="user-info-section">
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+                <div class="user-details">
+                    <h4>${APP_STATE.user?.name || 'Usuario'}</h4>
+                    <p>${APP_STATE.user?.email || 'No registrado'}</p>
                 </div>
             </div>
-            <button class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 0.6rem;" onclick="localStorage.removeItem('abc_user'); location.reload();">
-                CAMBIAR USUARIO / RE-REGISTRAR
+            <button class="btn btn-secondary btn-small" style="width: 100%;" onclick="localStorage.removeItem('abc_user'); location.reload();">
+                CAMBIAR USUARIO
             </button>
         </div>
     `;
@@ -536,134 +551,147 @@ function renderAdmin() {
 
 function renderAdminCiclos() {
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="refresh-cw"></i></div>
-                <h2 style="font-size: 1.25rem;">Ciclos</h2>
+                <h2 class="view-title">Ciclos</h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('admin')">VOLVER</button>
+            <button class="btn btn-secondary btn-small" onclick="renderView('admin')" style="max-width: 100px;">
+                <i data-lucide="arrow-left"></i> VOLVER
+            </button>
         </div>
         
-        <div class="card" style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Agregar Nuevo Ciclo</h3>
+        <div class="card add-item-card">
+            <h3 class="card-subtitle">Agregar Nuevo Ciclo</h3>
             <div class="field-group">
                 <input type="text" id="new-ciclo-nombre" class="input-modern" placeholder="Ej: Verano 2026">
             </div>
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="addItemCiclo()">
-                <i data-lucide="plus" style="width: 18px; height: 18px;"></i> AÑADIR CICLO
+            <button class="btn btn-primary" style="width: 100%;" onclick="addItemCiclo()">
+                <i data-lucide="plus"></i> AÑADIR CICLO
             </button>
         </div>
 
         <div class="list-container">
             ${APP_STATE.collections.ciclos.map(c => `
-                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-                    <span style="font-weight: 600;">${c.nombre}</span>
-                    <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('ciclos', '${c.id}', 'admin_ciclos')">
-                        <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                <div class="card list-item-card">
+                    <span class="item-name">${c.nombre}</span>
+                    <button class="btn-icon-only delete" onclick="deleteItem('ciclos', '${c.id}', 'admin_ciclos')">
+                        <i data-lucide="trash-2"></i>
                     </button>
                 </div>
-            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay ciclos.</p>'}
+            `).join('') || '<p class="empty-list-msg">No hay ciclos registrados.</p>'}
         </div>
-`;
+    `;
 }
 
 function renderAdminFincas() {
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="building-2"></i></div>
-                <h2 style="font-size: 1.25rem;">Fincas</h2>
+                <h2 class="view-title">Fincas</h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('admin')">VOLVER</button>
+            <button class="btn btn-secondary btn-small" onclick="renderView('admin')" style="max-width: 100px;">
+                <i data-lucide="arrow-left"></i> VOLVER
+            </button>
         </div>
         
-        <div class="card" style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Agregar Nueva Finca</h3>
+        <div class="card add-item-card">
+            <h3 class="card-subtitle">Agregar Nueva Finca</h3>
             <div class="field-group">
                 <input type="text" id="new-finca-nombre" class="input-modern" placeholder="Ej: Finca La Esperanza">
             </div>
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="addItemFinca()">
-                <i data-lucide="plus" style="width: 18px; height: 18px;"></i> AÑADIR FINCA
+            <button class="btn btn-primary" style="width: 100%;" onclick="addItemFinca()">
+                <i data-lucide="plus"></i> AÑADIR FINCA
             </button>
         </div>
 
         <div class="list-container">
             ${APP_STATE.collections.fincas.map(f => `
-                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-                    <span style="font-weight: 600;">${f.nombre}</span>
-                    <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('fincas', '${f.id}', 'admin_fincas')">
-                        <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                <div class="card list-item-card">
+                    <span class="item-name">${f.nombre}</span>
+                    <button class="btn-icon-only delete" onclick="deleteItem('fincas', '${f.id}', 'admin_fincas')">
+                        <i data-lucide="trash-2"></i>
                     </button>
                 </div>
-            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay fincas.</p>'}
+            `).join('') || '<p class="empty-list-msg">No hay fincas registradas.</p>'}
         </div>
-`;
+    `;
 }
 
 function renderAdminLotes() {
-    const cicloOptions = APP_STATE.collections.ciclos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-    const fincaOptions = APP_STATE.collections.fincas.map(f => `<option value="${f.id}">${f.nombre}</option>`).join('');
-
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div class="card-icon"><i data-lucide="grid-3x3"></i></div>
-                <h2 style="font-size: 1.25rem;">Lotes</h2>
+        <div class="view-header">
+            <div class="header-main">
+                <div class="card-icon"><i data-lucide="layers"></i></div>
+                <h2 class="view-title">Lotes</h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="renderView('admin')">VOLVER</button>
+            <button class="btn btn-secondary btn-small" onclick="renderView('admin')" style="max-width: 100px;">
+                <i data-lucide="arrow-left"></i> VOLVER
+            </button>
         </div>
         
-        <div class="card" style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Nuevo Lote</h3>
-            <div class="field-group">
-                <label>Ciclo Agrícola</label>
-                <select id="new-lote-ciclo" class="input-modern">${cicloOptions}</select>
-            </div>
-            <div class="field-group">
-                <label>Finca</label>
-                <select id="new-lote-finca" class="input-modern" onchange="updateLotesSugeridos()">${fincaOptions}</select>
+        <div class="card add-item-card">
+            <h3 class="card-subtitle">Agregar Nuevo Lote</h3>
+            <div class="grid-2">
+                <div class="field-group">
+                    <label>Ciclo</label>
+                    <select id="new-lote-ciclo" class="input-modern">
+                        ${APP_STATE.collections.ciclos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Finca</label>
+                    <select id="new-lote-finca" class="input-modern" onchange="updateLotesSugeridos()">
+                        ${APP_STATE.collections.fincas.map(f => `<option value="${f.id}">${f.nombre}</option>`).join('')}
+                    </select>
+                </div>
             </div>
             <div class="field-group">
                 <label>Nombre del Lote</label>
-                <input type="text" id="new-lote-nombre" class="input-modern" placeholder="Ej: Lote A1" list="lotes-historicos" autocomplete="off">
+                <input type="text" id="new-lote-nombre" class="input-modern" placeholder="Ej: Lote 1 - Sección A" list="lotes-historicos" autocomplete="off">
                 <datalist id="lotes-historicos"></datalist>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="grid-2">
                 <div class="field-group">
                     <label>Variedad</label>
-                    <input type="text" id="new-lote-variedad" class="input-modern" placeholder="Ej: Palmar 18">
+                    <input type="text" id="new-lote-variedad" class="input-modern" placeholder="Ej: Fedearroz 67">
                 </div>
                 <div class="field-group">
                     <label>Área (Ha)</label>
-                    <input type="number" id="new-lote-area" class="input-modern" placeholder="0.0">
+                    <input type="number" id="new-lote-area" class="input-modern" placeholder="Ej: 5.5">
                 </div>
             </div>
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="addItemLote()">
-                <i data-lucide="plus" style="width: 18px; height: 18px;"></i> AÑADIR LOTE
+            <button class="btn btn-primary" style="width: 100%;" onclick="addItemLote()">
+                <i data-lucide="plus"></i> AÑADIR LOTE
             </button>
         </div>
 
         <div class="list-container">
-            ${APP_STATE.collections.lotes.map(l => {
-        const ciclo = APP_STATE.collections.ciclos.find(c => c.id === l.cicloId)?.nombre || 'N/A';
-        const finca = APP_STATE.collections.fincas.find(f => f.id === l.fincaId)?.nombre || 'N/A';
+            ${APP_STATE.collections.lotes.slice().reverse().map(l => {
+        const ciclo = APP_STATE.collections.ciclos.find(c => c.id === l.cicloId)?.nombre || '---';
+        const finca = APP_STATE.collections.fincas.find(f => f.id === l.fincaId)?.nombre || '---';
         return `
-                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-                        <div>
-                            <span style="font-weight: 700; display: block;">${l.nombre}</span>
-                            <span style="font-size: 0.7rem; color: var(--text-secondary);">${ciclo} • ${finca} ${l.variedad ? '• ' + l.variedad : ''} • ${l.area || '0'} Ha</span>
-                        </div>
-                        <button class="btn btn-secondary" style="color: var(--accent-red); padding: 0.4rem; border: none; background: transparent;" onclick="deleteItem('lotes', '${l.id}', 'admin_lotes')">
-                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                <div class="card list-item-nested-card">
+                    <div class="item-header">
+                        <span class="item-name">${l.nombre}</span>
+                        <button class="btn-icon-only delete" onclick="deleteItem('lotes', '${l.id}', 'admin_lotes')">
+                            <i data-lucide="trash-2"></i>
                         </button>
                     </div>
-                `;
-    }).join('') || '<p style="text-align: center; color: var(--text-secondary);">No hay lotes.</p>'}
+                    <div class="item-details-grid">
+                        <div class="detail-row"><span>Ciclo:</span> <strong>${ciclo}</strong></div>
+                        <div class="detail-row"><span>Finca:</span> <strong>${finca}</strong></div>
+                        <div class="detail-row"><span>Var:</span> <strong>${l.variedad || '-'}</strong> | <span>Área:</span> <strong>${l.area || '-'} Ha</strong></div>
+                    </div>
+                </div>
+            `;
+    }).join('') || '<p class="empty-list-msg">No hay lotes registrados.</p>'}
         </div>
         <script>
             setTimeout(() => { if (typeof updateLotesSugeridos === "function") updateLotesSugeridos(); }, 0);
         </script>
-`;
+    `;
 }
 
 function updateLotesSugeridos() {
@@ -866,84 +894,87 @@ function renderRecords() {
         ].filter(Boolean).join('');
 
         const section = (emoji, label, chips) => chips ? `
-            <div style="margin-bottom:0.5rem;">
-                <div style="font-size:0.58rem;font-weight:800;letter-spacing:1.2px;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.3rem;">${emoji} ${label}</div>
-                <div style="display:flex;flex-wrap:wrap;">${chips}</div>
+            <div class="record-detail-section">
+                <div class="record-detail-label">${emoji} ${label}</div>
+                <div class="record-detail-chips">${chips}</div>
             </div>` : '';
 
-        const details = section('🐛','Plagas',pestChips)
-                      + section('🦠','Enfermedades',diseaseChips)
-                      + section('🌿','Malezas',weedChips)
-                      + section('📈','Crecimiento',growthChips);
+        const details = [
+            section('🐛', 'Plagas', pestChips),
+            section('🦠', 'Enfermedades', diseaseChips),
+            section('🌿', 'Malezas', weedChips),
+            section('📈', 'Crecimiento', growthChips)
+        ].filter(Boolean).join('');
 
         return `
-            <div class="card" style="padding: 1.25rem; border-left: 5px solid ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; animation: slideUp 0.4s ease-out backwards; animation-delay: ${idx * 0.05}s;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                    <div style="display: flex; gap: 0.75rem;">
-                        <div class="card-icon" style="margin-top: 0.2rem;">
-                            <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
+            <div class="card record-card ${r.synced ? 'synced' : 'pending'}">
+                <div class="record-header">
+                    <div class="record-info">
+                        <div class="record-icon-wrap">
+                            <i data-lucide="map-pin"></i>
                         </div>
-                        <div>
-                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); letter-spacing: -0.5px;">${recNum}${h.lote_name || 'Lote Descon.'}</div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;">
-                                <i data-lucide="calendar" style="width: 12px; height: 12px;"></i>
-                                ${dateStr} • ${timeStr}
+                        <div class="record-text">
+                            <div class="record-title">${recNum}${h.lote_name || 'Lote Descon.'}</div>
+                            <div class="record-meta">
+                                <i data-lucide="calendar"></i>
+                                <span>${dateStr} • ${timeStr}</span>
                             </div>
                         </div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:0.4rem;">
-                        ${!r.synced ? `<button onclick="editRecord(${originalIdx})" style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.55rem;border-radius:99px;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.45);color:#60a5fa;font-size:0.65rem;font-weight:800;cursor:pointer;">✏️ EDITAR</button>` : ''}
-                        <span style="font-size: 0.65rem; padding: 0.25rem 0.6rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: ${r.synced ? 'var(--accent-green)' : 'var(--accent-yellow)'}; font-weight: 800; border: 1px solid currentColor; white-space:nowrap;">
-                            ${r.synced ? 'SINC' : 'PEND'}
-                        </span>
+                    <div class="record-status-badge ${r.synced ? 'synced' : 'pending'}">
+                        ${r.synced ? 'SINC' : 'PEND'}
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.6rem;">
-                    <div><strong>Ciclo:</strong> ${h.ciclo_name || '-'}</div>
-                    <div><strong>Variedad:</strong> ${h.variedad || '-'}</div>
-                    <div><strong>Plaguero:</strong> ${h.plaguero || '-'}</div>
-                    <div><strong>Área:</strong> ${h.area || '-'} Ha | <strong>Edad:</strong> ${h.edad || '-'} dds</div>
+                <div class="record-grid">
+                    <div class="grid-item"><strong>Ciclo:</strong> ${h.ciclo_name || '-'}</div>
+                    <div class="grid-item"><strong>Variedad:</strong> ${h.variedad || '-'}</div>
+                    <div class="grid-item"><strong>Plaguero:</strong> ${h.plaguero || '-'}</div>
+                    <div class="grid-item"><strong>Área:</strong> ${h.area || '-'} Ha</div>
                 </div>
 
-                <div style="background: rgba(0,0,0,0.2); padding: 0.4rem 0.6rem; border-radius: 8px; font-size: 0.68rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-                    📍 ${coords.lat?.toFixed(5) || '?'}, ${coords.lon?.toFixed(5) || '?'}
+                <div class="record-coords">
+                    <i data-lucide="navigation"></i>
+                    <span>${coords.lat?.toFixed(5) || '?'}, ${coords.lon?.toFixed(5) || '?'}</span>
                 </div>
 
-                ${details ? `<div style="border-top:1px solid var(--glass-border);padding-top:0.65rem;margin-bottom:0.75rem;">${details}</div>` : ''}
+                ${details ? `<div class="record-details">${details}</div>` : ''}
 
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.75rem; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; gap: 0.3rem;" onclick="deleteRecord(${originalIdx})">
-                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> ELIMINAR
-                    </button>
+                <div class="record-actions">
+                    ${!r.synced ? `<button class="btn btn-secondary btn-small" onclick="editRecord(${originalIdx})"><i data-lucide="edit-3"></i> EDITAR</button>` : ''}
+                    <button class="btn btn-secondary btn-small delete-btn" onclick="deleteRecord(${originalIdx})"><i data-lucide="trash-2"></i> ELIMINAR</button>
                 </div>
             </div>
         `;
     }).join('');
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="history"></i></div>
-                <h2 style="font-size: 1.5rem; letter-spacing: -0.5px;">Registros</h2>
+                <h2 class="view-title">Registros</h2>
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">${records.length} TOTAL</div>
+            <div class="header-count">${records.length} TOTAL</div>
         </div>
 
-    ${pending > 0 ? `
-        <div class="card" style="border: 1px solid var(--accent-emerald); background: rgba(0, 242, 254, 0.05); padding: 1.25rem; text-align: center; margin-bottom: 1.5rem; animation: slideUp 0.4s ease-out;">
-            <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 1rem; font-weight: 500;">Tiene <span style="color: var(--accent-emerald); font-weight: 700;">${pending}</span> registros pendientes</p>
-            <button id="sync-btn-all" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="syncWithGoogleSheets()">
-                <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> SINCRONIZAR TODO
-            </button>
-        </div>
-        ` : ''
-        }
+        ${pending > 0 ? `
+            <div class="card pending-summary-card">
+                <p>Tienes <span class="neon-text">${pending}</span> registros pendientes</p>
+                <button class="btn btn-primary sync-all-btn" onclick="syncWithGoogleSheets()">
+                    <i data-lucide="cloud-upload"></i> SINCRONIZAR TODO
+                </button>
+            </div>
+        ` : ''}
 
-<div class="monitoring-scroll">
-    ${list || '<div style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);"> <i data-lucide="inbox" style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 1rem;"></i><p>No hay registros locales.</p></div>'}
-</div>
-`;
+        <div class="monitoring-scroll">
+            ${list || `
+                <div class="empty-state">
+                    <i data-lucide="inbox"></i>
+                    <p>No hay registros locales.</p>
+                </div>
+            `}
+        </div>
+    `;
 }
 
 function deleteRecord(index) {
@@ -1052,13 +1083,13 @@ function renderMonitorHeader() {
     const ciclosOptions = `<option value="">Seleccione Ciclo...</option>` + APP_STATE.collections.ciclos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="file-text"></i></div>
-                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Encabezado</h2>
+                <h2 class="view-title">Encabezado</h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('dashboard')">
-                <i data-lucide="x" style="width: 14px; height: 14px;"></i> CANCELAR
+            <button class="btn btn-secondary btn-small" onclick="renderView('dashboard')">
+                <i data-lucide="x"></i> CANCELAR
             </button>
         </div>
         
@@ -1190,8 +1221,8 @@ function renderMonitorNav(activeView) {
         <div class="monitor-steps">
             ${steps.map(step => `
                 <div class="step-item ${activeView === step.id ? 'active' : ''}" onclick="window.scrollTo(0,0); renderView('${step.id}')">
-                    <span style="font-size:1.3rem;line-height:1;">${step.emoji}</span>
-                    <span>${step.label}</span>
+                    <span class="step-emoji">${step.emoji}</span>
+                    <span class="step-label">${step.label}</span>
                 </div>
             `).join('')}
         </div>
@@ -1310,13 +1341,13 @@ function renderMonitorPests() {
     });
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="bug"></i></div>
-                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Plagas <span style="color: var(--text-secondary); font-size: 0.9rem;">1/5</span></h2>
+                <h2 class="view-title">Plagas <span class="step-indicator">1/5</span></h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_header')">
-                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            <button class="btn btn-secondary btn-small" onclick="renderView('monitor_header')">
+                <i data-lucide="chevron-left"></i> ATRÁS
             </button>
         </div>
         
@@ -1327,8 +1358,8 @@ function renderMonitorPests() {
         </div>
         
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="renderView('monitor_diseases')">
-                CONTINUAR <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            <button class="btn btn-primary" style="width: 100%;" onclick="renderView('monitor_diseases')">
+                CONTINUAR <i data-lucide="arrow-right"></i>
             </button>
         </div>
 `;
@@ -1388,7 +1419,7 @@ function renderMonitorDiseases() {
         const dEmoji = diseaseIconMap_local[d.id] || '🦠';
 
         diseaseHtml += `
-            <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+            <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
                         <div class="disease-icon-badge" onclick="showThreshold('${d.id}')">${dEmoji}</div>
@@ -1439,13 +1470,13 @@ function renderMonitorDiseases() {
     });
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div class="card-icon"><i data-lucide="thermometer-sun"></i></div>
-                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Enfermedades <span style="color: var(--text-secondary); font-size: 0.9rem;">2/5</span></h2>
+        <div class="view-header">
+            <div class="header-main">
+                <div class="card-icon"><i data-lucide="microscope"></i></div>
+                <h2 class="view-title">Enfermedades <span class="step-indicator">2/5</span></h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_pests')">
-                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            <button class="btn btn-secondary btn-small" onclick="renderView('monitor_pests')">
+                <i data-lucide="chevron-left"></i> ATRÁS
             </button>
         </div>
         
@@ -1456,8 +1487,8 @@ function renderMonitorDiseases() {
         </div>
         
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="renderView('monitor_weeds')">
-                CONTINUAR <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            <button class="btn btn-primary" style="width: 100%;" onclick="renderView('monitor_weeds')">
+                CONTINUAR <i data-lucide="arrow-right"></i>
             </button>
         </div>
     `;
@@ -1495,7 +1526,7 @@ function renderMonitorWeeds() {
         const wEmoji = weedEmojiMap[wName] || '🌱';
 
         selectedHtml += `
-            <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+            <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
                         <div class="weed-icon-badge" onclick="showThreshold('malezas_${currentLevel >= 7 ? 'grandes' : (currentLevel >= 4 ? 'medianas' : 'pequenas')}')">${wEmoji}</div>
@@ -1519,13 +1550,13 @@ function renderMonitorWeeds() {
     });
 
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="sprout"></i></div>
-                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Malezas <span style="color: var(--text-secondary); font-size: 0.9rem;">3/5</span></h2>
+                <h2 class="view-title">Malezas <span class="step-indicator">3/5</span></h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_diseases')">
-                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            <button class="btn btn-secondary btn-small" onclick="renderView('monitor_diseases')">
+                <i data-lucide="chevron-left"></i> ATRÁS
             </button>
         </div>
         
@@ -1536,8 +1567,8 @@ function renderMonitorWeeds() {
         </div>
         
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="renderView('monitor_growth')">
-                CONTINUAR <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            <button class="btn btn-primary" style="width: 100%;" onclick="renderView('monitor_growth')">
+                CONTINUAR <i data-lucide="arrow-right"></i>
             </button>
         </div>
     `;
@@ -1550,13 +1581,13 @@ function setWeedLevel(wName, level) {
 
 function renderMonitorGrowth() {
     return `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="view-header">
+            <div class="header-main">
                 <div class="card-icon"><i data-lucide="line-chart"></i></div>
-                <h2 style="font-size: 1.25rem; letter-spacing: -0.5px;">Crecimiento <span style="color: var(--text-secondary); font-size: 0.9rem;">4/5</span></h2>
+                <h2 class="view-title">Crecimiento <span class="step-indicator">4/5</span></h2>
             </div>
-            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.2rem;" onclick="renderView('monitor_weeds')">
-                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> ATRÁS
+            <button class="btn btn-secondary btn-small" onclick="renderView('monitor_weeds')">
+                <i data-lucide="chevron-left"></i> ATRÁS
             </button>
         </div>
 
@@ -1593,8 +1624,8 @@ function renderMonitorGrowth() {
         </div>
         
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="saveAndFinish()">
-                <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            <button class="btn btn-primary" style="width: 100%;" onclick="saveAndFinish()">
+                <i data-lucide="check-circle"></i>
                 FINALIZAR MONITOREO
             </button>
         </div>
@@ -1759,29 +1790,25 @@ async function installPWA() {
 
 function renderRegistration() {
     return `
-        <div class="card" style="margin-top: 2rem; padding: 2rem;">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="card-icon" style="margin-bottom: 1rem; transform: scale(1.5);"><i data-lucide="user-plus"></i></div>
-                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Registro de Dispositivo</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Complete sus datos para habilitar el uso de la aplicación.</p>
+        <div class="card registration-card">
+            <div class="registration-header">
+                <div class="registration-icon-wrap">
+                    <i data-lucide="user-plus"></i>
+                </div>
+                <h2 class="view-title">Registro de Dispositivo</h2>
+                <p class="view-subtitle">Complete sus datos para habilitar el uso de la aplicación.</p>
             </div>
 
             <div class="field-group">
                 <label>Nombre Completo</label>
-                <div style="position: relative;">
-                    <i data-lucide="user" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
-                    <input type="text" id="reg-name" class="input-modern" style="padding-left: 3rem;" placeholder="Ej: Mario Garcia">
+                <div class="input-with-icon">
+                    <i data-lucide="user"></i>
+                    <input type="text" id="reg-name" class="input-modern" placeholder="Ej: Mario Garcia">
                 </div>
             </div>
 
             <div class="field-group">
                 <label>Correo Electrónico</label>
-                <div style="position: relative;">
-                    <i data-lucide="mail" style="position: absolute; left: 1rem; top: 1.1rem; width: 18px; color: var(--text-secondary);"></i>
-                    <input type="email" id="reg-email" class="input-modern" style="padding-left: 3rem;" placeholder="usuario@ejemplo.com">
-                </div>
-            </div>
-
             <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveRegistration()">
                 REGISTRAR DISPOSITIVO
             </button>
