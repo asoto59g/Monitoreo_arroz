@@ -209,16 +209,17 @@ const THRESHOLDS_DATA = {
     },
     beneficos: {
         name: "Benéficos",
+        isInverted: true,
         rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Depredadores / Parasitoides / Hongos" }]
     },
-    pentatomidos: { name: "Pentatómidos", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
-    libelulas: { name: "Libélulas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
-    aranas: { name: "Arañas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
-    mariquitas: { name: "Mariquitas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
-    crisopas: { name: "Crisopas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
-    avispas: { name: "Avispas", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos parasitoides" }] },
-    parasitacion: { name: "Parasitación", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos parasitoides" }] },
-    hongos: { name: "Hongos Entomopatógenos", rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Hongos que controlan plagas" }] },
+    pentatomidos: { name: "Pentatómidos", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    libelulas: { name: "Libélulas", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    aranas: { name: "Arañas", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    mariquitas: { name: "Mariquitas", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    crisopas: { name: "Crisopas", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos depredadores" }] },
+    avispas: { name: "Avispas", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos parasitoides" }] },
+    parasitacion: { name: "Parasitación", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Organismos parasitoides" }] },
+    hongos: { name: "Hongos Entomopatógenos", isInverted: true, rows: [{ cond: "Control natural", n1: "<= 1", n2: "> 1 y < 3", n3: ">= 3", obs: "Hongos que controlan plagas" }] },
 
     // ENFERMEDADES
     rizoctonia: {
@@ -1872,12 +1873,17 @@ function showThreshold(id) {
         `;
     } else {
         // Standard Rows
+        const c1 = data.isInverted ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.15)';
+        const t1 = data.isInverted ? '#ef4444' : '#10b981';
+        const c3 = data.isInverted ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.15)';
+        const t3 = data.isInverted ? '#10b981' : '#ef4444';
+
         let rowsHtml = data.rows.map(row => `
             <tr>
                 <td>${row.cond}</td>
-                <td style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">${row.n1}</td>
+                <td style="background: ${c1}; color: ${t1}; font-weight: 700;">${row.n1}</td>
                 <td style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-weight: 700;">${row.n2}</td>
-                <td style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700;">${row.n3}</td>
+                <td style="background: ${c3}; color: ${t3}; font-weight: 700;">${row.n3}</td>
                 <td style="font-size: 0.75rem; opacity: 0.8;">${row.obs}</td>
             </tr>
         `).join('');
