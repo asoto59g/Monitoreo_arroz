@@ -282,19 +282,20 @@ const THRESHOLDS_DATA = {
         rows: [{ cond: "Daño sintomas area foliar", n1: "<= 1%", n2: "> 1% y < 2%", n3: ">= 2%", obs: "" }]
     },
 
-    // MALEZAS
-    malezas_grandes: {
-        name: "Malezas Grandes (Mas 4 hojas)",
-        rows: [{ cond: "Densidad/m2", n1: "3", n2: "6", n3: "9", obs: "" }]
+    // MALEZAS common grid
+    malezas_grid: {
+        name: "Malezas / m2",
+        isGrid: true,
+        header: ["Tamaño", "<=0.5", ">0.5 y <3", ">=3", "Referencia"],
+        rows: [
+            ["Grandes", "3", "6", "9", "Mas 4 hojas o macolladas"],
+            ["Medianas", "2", "5", "8", "Malezas de 2 a 4 hojas"],
+            ["Pequeñas", "1", "4", "7", "Malezas menos de 2 hojas"]
+        ]
     },
-    malezas_medianas: {
-        name: "Malezas Medianas (2 a 4 hojas)",
-        rows: [{ cond: "Densidad/m2", n1: "2", n2: "5", n3: "8", obs: "" }]
-    },
-    malezas_pequenas: {
-        name: "Malezas Pequeñas (Menos 2 hojas)",
-        rows: [{ cond: "Densidad/m2", n1: "1", n2: "4", n3: "7", obs: "" }]
-    },
+    malezas_grandes: { alias: "malezas_grid" },
+    malezas_medianas: { alias: "malezas_grid" },
+    malezas_pequenas: { alias: "malezas_grid" },
 
     // CRECIMIENTO
     poblacion: {
@@ -1821,13 +1822,13 @@ function saveRegistration() {
     renderView('dashboard');
 }
 
-// Threshold Modal System
 function showThreshold(id) {
     console.log('Solicitando umbral para:', id);
-    const data = THRESHOLDS_DATA[id];
+    let data = THRESHOLDS_DATA[id];
+    if (data && data.alias) data = THRESHOLDS_DATA[data.alias];
+    
     if (!data) {
         console.error('No threshold data for ID:', id);
-        // alert('Sin datos para: ' + id);
         return;
     }
 
@@ -1839,15 +1840,65 @@ function showThreshold(id) {
     modal.id = 'threshold-modal';
     modal.className = 'threshold-modal-overlay';
     
-    let rowsHtml = data.rows.map(row => `
-        <tr>
-            <td>${row.cond}</td>
-            <td style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">${row.n1}</td>
-            <td style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-weight: 700;">${row.n2}</td>
-            <td style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700;">${row.n3}</td>
-            <td style="font-size: 0.75rem; opacity: 0.8;">${row.obs}</td>
-        </tr>
-    `).join('');
+    let bodyHtml = '';
+    
+    if (data.isGrid) {
+        // Special 4x5 Grid for Weeds
+        let tableRows = data.rows.map(row => `
+            <tr>
+                <td style="font-weight:700; color:#fff; background: rgba(255,255,255,0.05);">${row[0]}</td>
+                <td style="background: rgba(16, 185, 129, 0.4); color: #fff; font-weight: 800; text-align:center;">${row[1]}</td>
+                <td style="background: rgba(245, 158, 11, 0.4); color: #fff; font-weight: 800; text-align:center;">${row[2]}</td>
+                <td style="background: rgba(239, 68, 68, 0.4); color: #fff; font-weight: 800; text-align:center;">${row[3]}</td>
+                <td style="font-size: 0.7rem; opacity: 0.8; line-height: 1.1; vertical-align: middle;">${row[4]}</td>
+            </tr>
+        `).join('');
+
+        bodyHtml = `
+            <table class="threshold-table weed-grid">
+                <thead>
+                    <tr>
+                        <th style="background:#1e293b;">${data.header[0]}</th>
+                        <th style="background:#10b981; color:#fff; text-align:center;">${data.header[1]}</th>
+                        <th style="background:#f59e0b; color:#fff; text-align:center;">${data.header[2]}</th>
+                        <th style="background:#ef4444; color:#fff; text-align:center;">${data.header[3]}</th>
+                        <th style="background:#1e293b;">${data.header[4]}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+        `;
+    } else {
+        // Standard Rows
+        let rowsHtml = data.rows.map(row => `
+            <tr>
+                <td>${row.cond}</td>
+                <td style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">${row.n1}</td>
+                <td style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-weight: 700;">${row.n2}</td>
+                <td style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700;">${row.n3}</td>
+                <td style="font-size: 0.75rem; opacity: 0.8;">${row.obs}</td>
+            </tr>
+        `).join('');
+        
+        bodyHtml = `
+            <table class="threshold-table">
+                <thead>
+                    <tr>
+                        <th>Condición</th>
+                        <th>Nivel 1</th>
+                        <th>Nivel 2</th>
+                        <th>Nivel 3</th>
+                        <th>Obs.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        `;
+    }
 
     modal.innerHTML = `
         <div class="threshold-modal-card">
@@ -1860,20 +1911,7 @@ function showThreshold(id) {
             </div>
             <div class="threshold-body">
                 <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                    <table class="threshold-table">
-                        <thead>
-                            <tr>
-                                <th>Condición</th>
-                                <th>Nivel 1</th>
-                                <th>Nivel 2</th>
-                                <th>Nivel 3</th>
-                                <th>Obs.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
+                    ${bodyHtml}
                 </div>
             </div>
             <div class="threshold-footer">
