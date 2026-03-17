@@ -50,21 +50,21 @@ body {
 .bg-blobs::before {
     content: '';
     position: absolute;
-    width: 300%;
-    height: 300%;
-    top: -100%;
-    left: -100%;
+    width: 350%;
+    height: 350%;
+    top: -125%;
+    left: -125%;
     background-image: 
-        radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
-        radial-gradient(3px 3px at 40px 70px, #fff, rgba(0,0,0,0)),
-        radial-gradient(4px 4px at 50px 160px, #fff, rgba(0,0,0,0)),
-        radial-gradient(3px 3px at 90px 40px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
-        radial-gradient(4px 4px at 160px 120px, #fff, rgba(0,0,0,0));
+        radial-gradient(4px 4px at 20px 30px, #fff, rgba(0,0,0,0)),
+        radial-gradient(6px 6px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(8px 8px at 50px 160px, #fff, rgba(0,0,0,0)),
+        radial-gradient(6px 6px at 90px 40px, #fff, rgba(0,0,0,0)),
+        radial-gradient(4px 4px at 130px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(8px 8px at 160px 120px, #fff, rgba(0,0,0,0));
     background-repeat: repeat;
-    background-size: 350px 350px;
-    opacity: 0.25;
-    animation: rotate 180s linear infinite;
+    background-size: 500px 500px;
+    opacity: 0.55;
+    animation: rotate 120s linear infinite;
 }
 
 @keyframes rotate {
@@ -75,34 +75,34 @@ body {
 .blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.35;
+    filter: blur(150px);
+    opacity: 0.65;
     animation: float 25s infinite alternate ease-in-out;
 }
 
 .blob-1 {
-    width: 1200px;
-    height: 1200px;
-    background: radial-gradient(circle, var(--accent-emerald) 0%, transparent 65%);
-    top: -400px;
-    left: -350px;
+    width: 2000px;
+    height: 2000px;
+    background: radial-gradient(circle, var(--accent-emerald) 0%, transparent 60%);
+    top: -500px;
+    left: -500px;
 }
 
 .blob-2 {
-    width: 1000px;
-    height: 1000px;
-    background: radial-gradient(circle, var(--accent-blue) 0%, transparent 65%);
-    bottom: -100px;
-    right: -300px;
+    width: 1800px;
+    height: 1800px;
+    background: radial-gradient(circle, var(--accent-blue) 0%, transparent 60%);
+    bottom: -200px;
+    right: -400px;
     animation-delay: -7s;
 }
 
 .blob-3 {
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 65%);
-    top: 30%;
-    left: 40%;
+    width: 1500px;
+    height: 1500px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.6) 0%, transparent 60%);
+    top: 25%;
+    left: 30%;
     animation: float 35s infinite alternate ease-in-out;
 }
 
