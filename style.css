@@ -42,8 +42,8 @@ body {
     z-index: -2;
     overflow: hidden;
     background-color: #010409;
-    background-image: url('nebula_bg.jpg');
-    background-position: center bottom;
+    background-image: url('rice_field_bg.jpg');
+    background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
 }
