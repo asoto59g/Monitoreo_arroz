@@ -1,9 +1,10 @@
-const CACHE_NAME = 'abc-rice-v30';
+const CACHE_NAME = 'abc-rice-v31';
 const ASSETS = [
     './',
     './index.html',
-    './style.css?v=30',
-    './app.js?v=30',
+    './style.css?v=31',
+    './app.js?v=31',
+    './nebula_bg.jpg',
     './manifest.json',
     './icon-512.png',
     './logo.png'
