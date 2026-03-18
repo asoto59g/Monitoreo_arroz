@@ -1504,30 +1504,37 @@ nav.bottom-nav .nav-item.active {
 }
 
 .action-main {
-    padding: 2rem;
+    margin: 1.25rem 1.25rem 0.75rem;
+    padding: 1.25rem 1.75rem;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.25rem;
     cursor: pointer;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent);
+    background: rgba(245, 158, 11, 0.15);
+    border: 1.5px solid rgba(245, 158, 11, 0.4);
+    border-radius: 2rem;
     transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
 }
 
 .action-main:active {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(245, 158, 11, 0.25);
     transform: scale(0.98);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
 }
 
 .action-icon-rocket {
-    font-size: 2rem;
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
 }
 
 .action-label {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    color: #ffd8a8;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
 .status-pill {
