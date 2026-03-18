@@ -526,40 +526,43 @@ nav.bottom-nav .nav-item.active {
 /* Disease 0-9 Grid */
 .grid-0-9 {
     display: grid;
-    /* 4 columns: 1 for '0', 3 for numbers 1-9 */
     grid-template-columns: 1.2fr 1fr 1fr 1fr;
     grid-template-rows: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 0.75rem;
-    align-items: stretch;
+    gap: 0;
+    margin-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+    border-left: 1px solid var(--glass-border);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .level-btn {
     aspect-ratio: 1;
-    border-radius: 14px;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
     color: var(--text-secondary);
     font-weight: 800;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s;
     cursor: pointer;
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
 }
 
 .level-btn:active {
-    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .level-btn-zero {
-    grid-row: span 3; /* Occupies the full height of 3 rows */
-    aspect-ratio: auto !important; /* Allow it to stretch vertically */
-    font-size: 1.5rem !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    grid-row: span 3;
+    aspect-ratio: auto !important;
+    font-size: 1.8rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary) !important;
 }
 
 .level-btn.active {
