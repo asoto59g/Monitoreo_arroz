@@ -47,21 +47,20 @@ body {
 .bg-blobs::before {
     content: '';
     position: absolute;
-    width: 400%;
-    height: 400%;
-    top: -150%;
-    left: -150%;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
     background-image: 
-        radial-gradient(4px 4px at 20px 30px, #fff, rgba(0,0,0,0)),
-        radial-gradient(6px 6px at 40px 70px, #fff, rgba(0,0,0,0)),
-        radial-gradient(8px 8px at 50px 160px, #fff, rgba(0,0,0,0)),
-        radial-gradient(6px 6px at 90px 40px, #fff, rgba(0,0,0,0)),
-        radial-gradient(4px 4px at 130px 80px, #fff, rgba(0,0,0,0)),
-        radial-gradient(8px 8px at 160px 120px, #fff, rgba(0,0,0,0));
+        radial-gradient(4px 4px at 20px 30px, #cbd5e1, rgba(0,0,0,0)),
+        radial-gradient(6px 6px at 40px 70px, #94a3b8, rgba(0,0,0,0)),
+        radial-gradient(4px 4px at 50px 160px, #cbd5e1, rgba(0,0,0,0)),
+        radial-gradient(6px 6px at 90px 40px, #94a3b8, rgba(0,0,0,0)),
+        radial-gradient(4px 4px at 130px 80px, #cbd5e1, rgba(0,0,0,0)),
+        radial-gradient(6px 6px at 160px 120px, #94a3b8, rgba(0,0,0,0));
     background-repeat: repeat;
-    background-size: 600px 600px;
-    opacity: 0.85; /* Estrellas muy brillantes */
-    animation: rotate 100s linear infinite;
+    background-size: 400px 400px;
+    opacity: 0.35; /* Estrellas suaves y estáticas */
 }
 
 @keyframes rotate {
@@ -72,65 +71,56 @@ body {
 .blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.8;
-    animation: float 20s infinite alternate ease-in-out;
+    filter: blur(140px);
+    opacity: 0.5; /* Intensidad reducida */
 }
 
 .blob-1 {
-    width: 1800px;
-    height: 1800px;
-    background: radial-gradient(circle, var(--accent-emerald) 0%, var(--accent-emerald) 25%, transparent 70%);
-    top: -400px;
-    left: -400px;
+    width: 1400px;
+    height: 1400px;
+    background: radial-gradient(circle, var(--accent-emerald) 0%, var(--accent-emerald) 20%, transparent 65%);
+    top: -200px;
+    left: -200px;
 }
 
 .blob-2 {
-    width: 1600px;
-    height: 1600px;
-    background: radial-gradient(circle, var(--accent-blue) 0%, var(--accent-blue) 25%, transparent 70%);
-    bottom: -100px;
-    right: -300px;
-    animation-delay: -5s;
+    width: 1200px;
+    height: 1200px;
+    background: radial-gradient(circle, var(--accent-blue) 0%, var(--accent-blue) 20%, transparent 65%);
+    bottom: 20%;
+    right: -250px;
 }
 
 .blob-3 {
-    width: 1400px;
-    height: 1400px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.7) 0%, rgba(139, 92, 246, 0.5) 20%, transparent 70%);
-    top: 20%;
-    left: 20%;
-    animation-delay: -10s;
+    width: 1100px;
+    height: 1100px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, transparent 65%);
+    top: 35%;
+    left: 10%;
 }
 
 .blob-4 {
-    width: 1200px;
-    height: 1200px;
-    background: radial-gradient(circle, rgba(0, 242, 254, 0.6) 0%, transparent 60%);
-    bottom: 0%;
-    left: 40%;
-    animation: float 30s infinite alternate ease-in-out;
-    animation-delay: -15s;
+    width: 1000px;
+    height: 1000px;
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.5) 0%, transparent 60%);
+    bottom: -100px;
+    left: 20%;
 }
 
 .blob-5 {
-    width: 1000px;
-    height: 1000px;
-    background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, rgba(220, 38, 38, 0.3) 25%, transparent 70%);
-    top: 10%;
-    right: -200px;
-    animation: float 22s infinite alternate ease-in-out;
-    animation-delay: -3s;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.35) 0%, transparent 65%);
+    top: 15%;
+    right: -150px;
 }
 
 .blob-6 {
-    width: 900px;
-    height: 900px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, rgba(5, 150, 105, 0.3) 25%, transparent 70%);
-    bottom: 10%;
-    left: -200px;
-    animation: float 28s infinite alternate ease-in-out;
-    animation-delay: -8s;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, transparent 65%);
+    bottom: 15%;
+    left: -150px;
 }
 
 @keyframes float {
