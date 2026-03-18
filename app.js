@@ -92,8 +92,8 @@ const DISEASE_DB = [
     { id: "erwinia", name: "Erwinia", scale: 3 },
     { id: "hojablanca", name: "Hoja Blanca", scale: 3 },
     { id: "falsocarbon", name: "Falso Carbon", scale: 3 },
-    { id: "piriculariaf", name: "Piricularia Follaje", scale: 9 },
-    { id: "piriculariac", name: "Piricularia Cuello", scale: 9 },
+    { id: "piriculariaf", name: "Piricularia Follaje", scale: 3 },
+    { id: "piriculariac", name: "Piricularia Cuello", scale: 3 },
     { id: "manchadograno", name: "Manchado Grano", scale: 3 },
     { id: "rizoctonia", name: "Rizoctonia", scale: 9 }
 ];
