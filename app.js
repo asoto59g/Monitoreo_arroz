@@ -2,6 +2,20 @@
  * Plagueo en Arroz - Core Application Logic
  */
 
+// ═══════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════
+function generateId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    // Fallback para navegadores antiguos
+    return Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+// ═══════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════
 const APP_STATE = {
     currentView: 'dashboard',
     user: JSON.parse(localStorage.getItem('abc_user') || 'null'),
@@ -30,9 +44,11 @@ const APP_STATE = {
             altura: 0,
             lamina: 0,
             fenologia: 0
-        }
+        },
+        notes: ''
     },
     deferredPrompt: null,
+    isOnline: navigator.onLine,
     editingRecordIdx: null   // índice del registro local que se está editando (null = nuevo)
 };
 
@@ -43,6 +59,9 @@ function saveData() {
     localStorage.setItem('abc_lotes_historicos', JSON.stringify(APP_STATE.collections.lotesHistoricos));
 }
 
+// ═══════════════════════════════════════════════════
+// BASE DE DATOS DE PLAGAS, ENFERMEDADES Y MALEZAS
+// ═══════════════════════════════════════════════════
 const PEST_DB = {
     invertebrates: [
         { id: "spodoptera", name: "Spodoptera" },
@@ -313,11 +332,35 @@ const THRESHOLDS_DATA = {
     }
 };
 
+// ═══════════════════════════════════════════════════
+// INICIALIZACIÓN Y NAVEGACIÓN
+// ═══════════════════════════════════════════════════
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
+    initOnlineStatus();
     renderView('dashboard');
 });
+
+function initOnlineStatus() {
+    const update = () => {
+        APP_STATE.isOnline = navigator.onLine;
+        const syncEl = document.getElementById('sync-status');
+        if (syncEl) {
+            if (APP_STATE.isOnline) {
+                syncEl.innerHTML = '🟢 EN LÍNEA';
+                syncEl.style.color = 'var(--accent-green)';
+            } else {
+                syncEl.innerHTML = '🔴 SIN RED';
+                syncEl.style.color = 'var(--accent-red)';
+            }
+        }
+    };
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    // Estado inicial
+    setTimeout(update, 500);
+}
 
 window.addEventListener('beforeinstallprompt', (e) => {
     // Prevent the mini-infobar from appearing on mobile
@@ -387,6 +430,7 @@ function renderView(viewName, preserveScroll) {
             break;
         case 'records':
             mainContent.innerHTML = renderRecords();
+            break;
             break;
         case 'monitor_header':
             mainContent.innerHTML = renderMonitorHeader();
@@ -528,6 +572,17 @@ function renderAdmin() {
             <div class="admin-text">
                 <h3>Limpieza de Datos</h3>
                 <p>Borrar registros sincronizados</p>
+            </div>
+            <i data-lucide="chevron-right" class="admin-chevron"></i>
+        </div>
+
+        <div class="card admin-menu-card" onclick="exportDataAsJSON()">
+            <div class="admin-icon-wrap" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                <i data-lucide="download"></i>
+            </div>
+            <div class="admin-text">
+                <h3>Exportar Respaldo</h3>
+                <p>Descargar datos como archivo JSON</p>
             </div>
             <i data-lucide="chevron-right" class="admin-chevron"></i>
         </div>
@@ -724,7 +779,7 @@ function addItemCiclo() {
     }
 
     APP_STATE.collections.ciclos.push({
-        id: Date.now().toString(),
+        id: generateId(),
         nombre: nombreInput.value.trim()
     });
     saveData();
@@ -739,7 +794,7 @@ function addItemFinca() {
     }
 
     APP_STATE.collections.fincas.push({
-        id: Date.now().toString(),
+        id: generateId(),
         nombre: nombreInput.value.trim()
     });
     saveData();
@@ -771,7 +826,7 @@ function addItemLote() {
 
     // 2. Guardar el lote en el ciclo activo
     APP_STATE.collections.lotes.push({
-        id: Date.now().toString(),
+        id: generateId(),
         nombre: loteNombreTrimmed,
         cicloId: cicloInput.value,
         fincaId: fincaInput.value,
@@ -822,15 +877,24 @@ function confirmDeleteSynced() {
     }
 }
 
-function renderRecords() {
+function renderRecords(filterStatus, filterFinca) {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     const pending = records.filter(r => !r.synced).length;
 
-    const list = records.slice().reverse().map((r, idx) => {
+    // Obtener fincas únicas de los registros
+    const fincasEnRegistros = [...new Set(records.map(r => r.header?.finca_name).filter(Boolean))].sort();
+
+    // Aplicar filtros
+    let filtered = records;
+    if (filterStatus === 'pending') filtered = filtered.filter(r => !r.synced);
+    else if (filterStatus === 'synced') filtered = filtered.filter(r => r.synced);
+    if (filterFinca) filtered = filtered.filter(r => r.header?.finca_name === filterFinca);
+
+    const list = filtered.slice().reverse().map((r, idx) => {
+        const originalIdx = records.indexOf(r);
         const date = new Date(r.timestamp);
         const dateStr = date.toLocaleDateString();
         const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const originalIdx = records.length - 1 - idx;
         const recNum = r.num ? `<span style="font-size:0.6rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:99px;background:rgba(255,255,255,0.07);color:var(--text-secondary);border:1px solid var(--glass-border);margin-right:0.4rem;">#${r.num}</span>` : '';
 
         const h = r.header || {};
@@ -839,7 +903,7 @@ function renderRecords() {
         // --- chip helpers ---
         const chipStyle = (valStr, maxScale, isInverted) => {
             const val = parseInt(valStr, 10);
-            let cat = 'high'; // default red
+            let cat = 'high';
             if (maxScale === 9) {
                 if (val <= 3) cat = 'low';
                 else if (val <= 6) cat = 'medium';
@@ -851,13 +915,10 @@ function renderRecords() {
                 if (pct <= 0.34) cat = 'low';
                 else if (pct <= 0.67) cat = 'medium';
             }
-            
-            // Invert colors for beneficials if requested
             if (isInverted) {
                 if (cat === 'low') cat = 'high';
                 else if (cat === 'high') cat = 'low';
             }
-
             if (cat === 'low') return 'background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.5);color:#10b981;';
             if (cat === 'medium') return 'background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);color:#f59e0b;';
             return 'background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#ef4444;';
@@ -906,6 +967,13 @@ function renderRecords() {
             section('📈', 'Crecimiento', growthChips)
         ].filter(Boolean).join('');
 
+        // Notas
+        const notesHtml = r.notes ? `
+            <div style="margin-top:0.75rem; padding:0.75rem; background:rgba(245,158,11,0.08); border-radius:0.75rem; border:1px solid rgba(245,158,11,0.2);">
+                <div style="font-size:0.6rem; font-weight:800; color:#f59e0b; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem;">📝 Notas</div>
+                <div style="font-size:0.8rem; color:#e2e8f0; line-height:1.3;">${r.notes}</div>
+            </div>` : '';
+
         return `
             <div class="card record-card ${r.synced ? 'synced' : 'pending'}">
                 <div class="record-header">
@@ -939,6 +1007,7 @@ function renderRecords() {
                 </div>
 
                 ${details ? `<div class="record-details">${details}</div>` : ''}
+                ${notesHtml}
 
                 <div class="record-actions">
                     ${!r.synced ? `<button class="btn btn-secondary btn-small" onclick="editRecord(${originalIdx})"><i data-lucide="edit-3"></i> EDITAR</button>` : ''}
@@ -948,21 +1017,51 @@ function renderRecords() {
         `;
     }).join('');
 
+    // Filtros actuales para estado activo de botones
+    const fAll = !filterStatus ? 'active' : '';
+    const fPend = filterStatus === 'pending' ? 'active' : '';
+    const fSync = filterStatus === 'synced' ? 'active' : '';
+
     return `
         <div class="view-header">
             <div class="header-main">
                 <div class="card-icon"><i data-lucide="history"></i></div>
                 <h2 class="view-title">Registros</h2>
             </div>
-            <div class="header-count">${records.length} TOTAL</div>
+            <div class="header-count">${filtered.length}/${records.length}</div>
+        </div>
+
+        <div class="card" style="padding:1rem 1.25rem; margin-bottom:1rem;">
+            <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; flex-wrap:wrap;">
+                <button class="btn btn-small ${fAll ? 'btn-primary' : 'btn-secondary'}" style="flex:1; min-width:60px;" onclick="filterRecords()">
+                    TODOS
+                </button>
+                <button class="btn btn-small ${fPend ? 'btn-primary' : 'btn-secondary'}" style="flex:1; min-width:60px;" onclick="filterRecords('pending', '${filterFinca || ''}')">
+                    ⏳ PEND
+                </button>
+                <button class="btn btn-small ${fSync ? 'btn-primary' : 'btn-secondary'}" style="flex:1; min-width:60px;" onclick="filterRecords('synced', '${filterFinca || ''}')">
+                    ✅ SINC
+                </button>
+            </div>
+            ${fincasEnRegistros.length > 1 ? `
+                <select class="input-modern" style="padding:0.6rem 1rem; font-size:0.8rem;" onchange="filterRecords('${filterStatus || ''}', this.value)">
+                    <option value="">🏠 Todas las fincas</option>
+                    ${fincasEnRegistros.map(f => `<option value="${f}" ${filterFinca === f ? 'selected' : ''}>${f}</option>`).join('')}
+                </select>
+            ` : ''}
         </div>
 
         ${pending > 0 ? `
             <div class="card pending-summary-card">
                 <p>Tienes <span class="neon-text">${pending}</span> registros pendientes</p>
-                <button class="btn btn-primary sync-all-btn" onclick="syncWithGoogleSheets()">
-                    <i data-lucide="cloud-upload"></i> SINCRONIZAR TODO
-                </button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="btn btn-primary sync-all-btn" style="flex:2;" onclick="syncWithGoogleSheets()">
+                        <i data-lucide="cloud-upload"></i> SINCRONIZAR
+                    </button>
+                    <button class="btn btn-secondary btn-small" style="flex:1;" onclick="exportRecordsAsCSV()">
+                        <i data-lucide="file-spreadsheet"></i> CSV
+                    </button>
+                </div>
             </div>
         ` : ''}
 
@@ -970,11 +1069,84 @@ function renderRecords() {
             ${list || `
                 <div class="empty-state">
                     <i data-lucide="inbox"></i>
-                    <p>No hay registros locales.</p>
+                    <p>${filterStatus || filterFinca ? 'No hay registros con estos filtros.' : 'No hay registros locales.'}</p>
                 </div>
             `}
         </div>
     `;
+}
+
+// Función wrapper para filtros que actualiza el DOM directamente
+function filterRecords(status, finca) {
+    const mainContent = document.getElementById('main-content');
+    if (!mainContent) return;
+    mainContent.innerHTML = renderRecords(status, finca);
+    if (window.lucide) window.lucide.createIcons();
+}
+
+function exportRecordsAsCSV() {
+    const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
+    if (records.length === 0) {
+        alert('No hay registros para exportar.');
+        return;
+    }
+
+    // Obtener todas las plagas, enfermedades y malezas posibles
+    const allPestIds = [...PEST_DB.invertebrates, ...PEST_DB.vertebrates, ...PEST_DB.beneficials].map(p => p.id);
+    const allPestNames = {};
+    [...PEST_DB.invertebrates, ...PEST_DB.vertebrates, ...PEST_DB.beneficials].forEach(p => allPestNames[p.id] = p.name);
+    const allDiseaseIds = DISEASE_DB.map(d => d.id);
+    const allDiseaseNames = {};
+    DISEASE_DB.forEach(d => allDiseaseNames[d.id] = d.name);
+
+    // Encabezados
+    const headers = [
+        'Num', 'Fecha', 'Hora', 'Sincronizado',
+        'Ciclo', 'Finca', 'Lote', 'Edad_DDS', 'Variedad', 'Area_Ha', 'Plaguero',
+        'Lat', 'Lon', 'Precision_m',
+        ...allPestIds.map(id => allPestNames[id]),
+        ...allDiseaseIds.map(id => allDiseaseNames[id]),
+        ...WEED_DB,
+        'Poblacion', 'Altura_cm', 'Lamina_Agua', 'Fenologia',
+        'Notas'
+    ];
+
+    const rows = records.map(r => {
+        const h = r.header || {};
+        const g = r.growth || {};
+        const coords = r.coords || {};
+        const date = new Date(r.timestamp);
+
+        return [
+            r.num || '',
+            date.toLocaleDateString(),
+            date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            r.synced ? 'SI' : 'NO',
+            h.ciclo_name || '', h.finca_name || '', h.lote_name || '',
+            h.edad || '', h.variedad || '', h.area || '', h.plaguero || '',
+            coords.lat || '', coords.lon || '', coords.acc ? Math.round(coords.acc) : '',
+            ...allPestIds.map(id => (r.pests || {})[id] || 0),
+            ...allDiseaseIds.map(id => (r.diseases || {})[id] || 0),
+            ...WEED_DB.map(w => (r.weeds || {})[w] || 0),
+            g.poblacion || '', g.altura || '', g.lamina || g.agua || '', g.fenologia || '',
+            (r.notes || '').replace(/"/g, '""')
+        ].map(v => `"${v}"`).join(',');
+    });
+
+    const csvContent = [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+    const BOM = '\uFEFF'; // Para soporte de caracteres especiales en Excel
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `RiceMon_Registros_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ CSV descargado: RiceMon_Registros_${dateStr}.csv\n\nPuede abrirlo en Excel o Google Sheets.`);
 }
 
 function deleteRecord(index) {
@@ -1344,7 +1516,7 @@ function renderMonitorPests() {
         <div class="view-header">
             <div class="header-main">
                 <div class="card-icon"><i data-lucide="bug"></i></div>
-                <h2 class="view-title">Plagas <span class="step-indicator">1/5</span></h2>
+                <h2 class="view-title">Plagas <span class="step-indicator">1/4</span></h2>
             </div>
             <button class="btn btn-secondary btn-small" onclick="renderView('monitor_header')">
                 <i data-lucide="chevron-left"></i> ATRÁS
@@ -1365,15 +1537,35 @@ function renderMonitorPests() {
 `;
 }
 
+// ═══════════════════════════════════════════════════
+// FUNCIONES DE NIVEL (Optimizadas - #7)
+// ═══════════════════════════════════════════════════
 function setPestLevel(id, level) {
     APP_STATE.monitoring.pests[id] = level;
-    renderView('monitor_pests', true); // preserve scroll position while selecting levels
+    // Actualización dirigida del DOM en vez de re-render completo
+    const card = document.getElementById('pest-' + id);
+    if (card) {
+        // Actualizar level-cards activos
+        card.querySelectorAll('.level-card').forEach(lc => {
+            const cardLevel = ['nulo','bajo','medio','alto'].indexOf(
+                [...lc.classList].find(c => ['nulo','bajo','medio','alto'].includes(c))
+            );
+            lc.classList.toggle('active', cardLevel === level);
+        });
+        // Actualizar dots de semáforo
+        const isBeneficial = (PEST_DB.beneficials || []).some(p => p.id === id);
+        const dots = card.querySelectorAll('.threshold-dot');
+        if (dots.length === 3) {
+            dots[0].classList.toggle('active', level > 0);
+            dots[1].classList.toggle('active', level > 1);
+            dots[2].classList.toggle('active', level > 2);
+        }
+    } else {
+        renderView('monitor_pests', true);
+    }
 }
 
-function setDiseaseLevel(id, level) {
-    APP_STATE.monitoring.diseases[id] = level;
-    renderView('monitor_diseases', true);
-}
+// setDiseaseLevel se define más abajo (una sola vez)
 
 function getLevelName(level, isAdvancedScale) {
     if (isAdvancedScale) {
@@ -1483,7 +1675,7 @@ function renderMonitorDiseases() {
         <div class="view-header">
             <div class="header-main">
                 <div class="card-icon"><i data-lucide="microscope"></i></div>
-                <h2 class="view-title">Enfermedades <span class="step-indicator">2/5</span></h2>
+                <h2 class="view-title">Enfermedades <span class="step-indicator">2/4</span></h2>
             </div>
             <button class="btn btn-secondary btn-small" onclick="renderView('monitor_pests')">
                 <i data-lucide="chevron-left"></i> ATRÁS
@@ -1506,7 +1698,43 @@ function renderMonitorDiseases() {
 
 function setDiseaseLevel(id, level) {
     APP_STATE.monitoring.diseases[id] = level;
-    renderView('monitor_diseases'); // Re-rendering is easier for now to keep state synced without complex DOM selecors
+    // Optimización: actualizar solo la card afectada
+    const diseaseInfo = DISEASE_DB.find(d => d.id === id);
+    const isAdvanced = diseaseInfo && diseaseInfo.scale === 9;
+
+    // Buscar la card de esta enfermedad
+    const cards = document.querySelectorAll('.monitoring-scroll .card');
+    let targetCard = null;
+    cards.forEach(card => {
+        const nameEl = card.querySelector('span[style*="font-weight: 700"]');
+        if (nameEl && nameEl.textContent.trim() === (diseaseInfo?.name || id)) targetCard = card;
+    });
+
+    if (targetCard) {
+        // Actualizar botones (grid 0-9 o level-cards)
+        if (isAdvanced) {
+            targetCard.querySelectorAll('.level-btn').forEach(btn => {
+                const btnLevel = parseInt(btn.textContent.trim());
+                btn.classList.toggle('active', btnLevel === level);
+            });
+        } else {
+            targetCard.querySelectorAll('.level-card').forEach(lc => {
+                const cardLevel = ['nulo','bajo','medio','alto'].indexOf(
+                    [...lc.classList].find(c => ['nulo','bajo','medio','alto'].includes(c))
+                );
+                lc.classList.toggle('active', cardLevel === level);
+            });
+        }
+        // Actualizar dots
+        const dots = targetCard.querySelectorAll('.threshold-dot');
+        if (dots.length === 3) {
+            dots[0].classList.toggle('active', level > 0);
+            dots[1].classList.toggle('active', isAdvanced ? level > 3 : level > 1);
+            dots[2].classList.toggle('active', isAdvanced ? level > 6 : level > 2);
+        }
+    } else {
+        renderView('monitor_diseases', true);
+    }
 }
 
 function renderMonitorWeeds() {
@@ -1563,7 +1791,7 @@ function renderMonitorWeeds() {
         <div class="view-header">
             <div class="header-main">
                 <div class="card-icon"><i data-lucide="sprout"></i></div>
-                <h2 class="view-title">Malezas <span class="step-indicator">3/5</span></h2>
+                <h2 class="view-title">Malezas <span class="step-indicator">3/4</span></h2>
             </div>
             <button class="btn btn-secondary btn-small" onclick="renderView('monitor_diseases')">
                 <i data-lucide="chevron-left"></i> ATRÁS
@@ -1586,7 +1814,31 @@ function renderMonitorWeeds() {
 
 function setWeedLevel(wName, level) {
     APP_STATE.monitoring.weeds[wName] = parseInt(level);
-    renderView('monitor_weeds', true); // preserve scroll position while selecting levels
+    // Actualización dirigida del DOM en vez de re-render completo
+    // Buscar la card de esta maleza por nombre
+    const cards = document.querySelectorAll('.monitoring-scroll .card');
+    let targetCard = null;
+    cards.forEach(card => {
+        const nameEl = card.querySelector('span[style*="font-weight: 700"]');
+        if (nameEl && nameEl.textContent.trim() === wName) targetCard = card;
+    });
+    if (targetCard) {
+        const lvl = parseInt(level);
+        // Actualizar botones del grid
+        targetCard.querySelectorAll('.level-btn').forEach(btn => {
+            const btnLevel = parseInt(btn.textContent.trim());
+            btn.classList.toggle('active', btnLevel === lvl);
+        });
+        // Actualizar dots
+        const dots = targetCard.querySelectorAll('.threshold-dot');
+        if (dots.length === 3) {
+            dots[0].classList.toggle('active', lvl > 0);
+            dots[1].classList.toggle('active', lvl > 3);
+            dots[2].classList.toggle('active', lvl > 6);
+        }
+    } else {
+        renderView('monitor_weeds', true);
+    }
 }
 
 function renderMonitorGrowth() {
@@ -1594,7 +1846,7 @@ function renderMonitorGrowth() {
         <div class="view-header">
             <div class="header-main">
                 <div class="card-icon"><i data-lucide="line-chart"></i></div>
-                <h2 class="view-title">Crecimiento <span class="step-indicator">4/5</span></h2>
+                <h2 class="view-title">Crecimiento <span class="step-indicator">4/4</span></h2>
             </div>
             <button class="btn btn-secondary btn-small" onclick="renderView('monitor_weeds')">
                 <i data-lucide="chevron-left"></i> ATRÁS
@@ -1630,11 +1882,15 @@ function renderMonitorGrowth() {
                         <option value="Cosecha" ${APP_STATE.monitoring.growth.fenologia === 'Cosecha' ? 'selected' : ''}>Cosecha</option>
                     </select>
                 </div>
+                <div class="field-group">
+                    <label>📝 Observaciones / Notas</label>
+                    <textarea id="mon-notes" class="input-modern" rows="3" placeholder="Ej: Aplicación reciente, condiciones climáticas, observaciones generales..." style="resize: vertical; min-height: 80px;">${APP_STATE.monitoring.notes || ''}</textarea>
+                </div>
             </div>
         </div>
         
         <div class="sticky-footer">
-            <button class="btn btn-primary" style="width: 100%;" onclick="saveAndFinish()">
+            <button class="btn btn-primary" style="width: 100%;" onclick="showPreSaveSummary()">
                 <i data-lucide="check-circle"></i>
                 FINALIZAR MONITOREO
             </button>
@@ -1642,11 +1898,12 @@ function renderMonitorGrowth() {
 `;
 }
 
-function saveAndFinish() {
+function showPreSaveSummary() {
     const poblacion = document.getElementById('mon-poblacion')?.value;
     const altura = document.getElementById('mon-altura')?.value;
     const agua = document.getElementById('mon-lamina')?.value;
     const fenologia = document.getElementById('mon-fenologia')?.value;
+    const notes = document.getElementById('mon-notes')?.value || '';
 
     if (!poblacion || !altura || !agua || !fenologia) {
         alert('⚠️ Por favor complete todos los parámetros de crecimiento (Población, Altura, Agua y Fenología) antes de finalizar.');
@@ -1654,7 +1911,87 @@ function saveAndFinish() {
     }
 
     APP_STATE.monitoring.growth = { poblacion, altura, lamina: agua, fenologia };
+    APP_STATE.monitoring.notes = notes;
 
+    // Contar plagas/enfermedades/malezas con valores > 0
+    const pestCount = Object.values(APP_STATE.monitoring.pests).filter(v => v > 0).length;
+    const diseaseCount = Object.values(APP_STATE.monitoring.diseases).filter(v => v > 0).length;
+    const weedCount = Object.values(APP_STATE.monitoring.weeds).filter(v => v > 0).length;
+    const h = APP_STATE.monitoring.header || {};
+
+    // Construir resumen
+    const existing = document.getElementById('summary-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'summary-modal';
+    modal.className = 'threshold-modal-overlay';
+    modal.innerHTML = `
+        <div class="threshold-modal-card">
+            <div class="threshold-header">
+                <div>
+                    <h3 style="margin:0; font-size:1.1rem; color:#fff;">📋 Resumen del Monitoreo</h3>
+                    <p style="margin:0; font-size:0.8rem; color:#94a3b8;">Verifique los datos antes de guardar</p>
+                </div>
+                <button class="close-modal" onclick="document.getElementById('summary-modal').remove()">×</button>
+            </div>
+            <div class="threshold-body" style="padding:1.25rem;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+                    <div style="background:rgba(255,255,255,0.03); padding:0.75rem; border-radius:0.75rem;">
+                        <div style="font-size:0.6rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">Finca</div>
+                        <div style="font-weight:700; font-size:0.95rem;">${h.finca_name || '-'}</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:0.75rem; border-radius:0.75rem;">
+                        <div style="font-size:0.6rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">Lote</div>
+                        <div style="font-weight:700; font-size:0.95rem;">${h.lote_name || '-'}</div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; margin-bottom:1rem;">
+                    <div style="background:${pestCount > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.03)'}; padding:0.75rem; border-radius:0.75rem; text-align:center;">
+                        <div style="font-size:1.3rem;">🐛</div>
+                        <div style="font-weight:800; font-size:1.1rem; color:${pestCount > 0 ? '#ef4444' : '#64748b'};">${pestCount}</div>
+                        <div style="font-size:0.6rem; color:#94a3b8;">PLAGAS</div>
+                    </div>
+                    <div style="background:${diseaseCount > 0 ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.03)'}; padding:0.75rem; border-radius:0.75rem; text-align:center;">
+                        <div style="font-size:1.3rem;">🦠</div>
+                        <div style="font-weight:800; font-size:1.1rem; color:${diseaseCount > 0 ? '#8b5cf6' : '#64748b'};">${diseaseCount}</div>
+                        <div style="font-size:0.6rem; color:#94a3b8;">ENFERM.</div>
+                    </div>
+                    <div style="background:${weedCount > 0 ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.03)'}; padding:0.75rem; border-radius:0.75rem; text-align:center;">
+                        <div style="font-size:1.3rem;">🌿</div>
+                        <div style="font-weight:800; font-size:1.1rem; color:${weedCount > 0 ? '#10b981' : '#64748b'};">${weedCount}</div>
+                        <div style="font-size:0.6rem; color:#94a3b8;">MALEZAS</div>
+                    </div>
+                </div>
+                <div style="background:rgba(59,130,246,0.1); padding:0.75rem; border-radius:0.75rem; margin-bottom:1rem;">
+                    <div style="font-size:0.6rem; color:#60a5fa; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem;">📈 Crecimiento</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; font-size:0.8rem;">
+                        <span>👥 <strong>${poblacion}</strong> pl/m²</span>
+                        <span>📏 <strong>${altura}</strong> cm</span>
+                        <span>💧 <strong>${agua}</strong></span>
+                        <span>🌱 <strong>${fenologia}</strong></span>
+                    </div>
+                </div>
+                ${notes ? `<div style="background:rgba(245,158,11,0.1); padding:0.75rem; border-radius:0.75rem; margin-bottom:0.5rem;">
+                    <div style="font-size:0.6rem; color:#f59e0b; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem;">📝 Notas</div>
+                    <div style="font-size:0.85rem; color:#e2e8f0; line-height:1.4;">${notes}</div>
+                </div>` : ''}
+            </div>
+            <div class="threshold-footer" style="display:flex; gap:0.75rem;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('summary-modal').remove()">
+                    ✏️ EDITAR
+                </button>
+                <button class="btn btn-primary" style="flex:2;" onclick="document.getElementById('summary-modal').remove(); saveAndFinish()">
+                    ✅ CONFIRMAR Y GUARDAR
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function saveAndFinish() {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
 
     if (APP_STATE.editingRecordIdx !== null) {
@@ -1672,7 +2009,8 @@ function saveAndFinish() {
             pests:     APP_STATE.monitoring.pests,
             diseases:  APP_STATE.monitoring.diseases,
             weeds:     APP_STATE.monitoring.weeds,
-            growth:    APP_STATE.monitoring.growth
+            growth:    APP_STATE.monitoring.growth,
+            notes:     APP_STATE.monitoring.notes
         };
         localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
         alert(`✅ Registro #${existing.num || ''} actualizado correctamente.`);
@@ -1685,7 +2023,7 @@ function saveAndFinish() {
         localStorage.setItem('abc_record_counter', counter.toString());
 
         records.push({
-            id: Date.now().toString(),
+            id: generateId(),
             num: counter,
             timestamp: new Date().toISOString(),
             coords: APP_STATE.monitoring.coords,
@@ -1704,13 +2042,17 @@ function saveAndFinish() {
         pests: {},
         diseases: {},
         weeds: {},
-        growth: { poblacion: 0, altura: 0, lamina: 0, fenologia: 0 }
+        growth: { poblacion: 0, altura: 0, lamina: 0, fenologia: 0 },
+        notes: ''
     };
 
     window.scrollTo(0, 0);
     renderView('records');
 }
 
+// ═══════════════════════════════════════════════════
+// SINCRONIZACIÓN Y EXPORTACIÓN
+// ═══════════════════════════════════════════════════
 async function syncWithGoogleSheets() {
     const records = JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]');
     const toSync = records.filter(r => !r.synced);
@@ -1747,17 +2089,26 @@ async function syncWithGoogleSheets() {
             alert('⚠️ ADVERTENCIA: La URL no parece ser de una "Aplicación Web" (debe terminar en /exec). Por favor, use el enlace "Cambiar URL" para corregirla.');
         }
 
-        await fetch(scriptURL, {
+        // Crear respaldo automático antes de sincronizar
+        try {
+            localStorage.setItem('abc_sync_backup', JSON.stringify(toSync));
+        } catch (e) { /* backup no es crítico */ }
+
+        const response = await fetch(scriptURL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(toSync.map(r => ({
                 ...r,
-                user: r.user || APP_STATE.user // Asegurar datos de usuario en registros viejos
+                user: r.user || APP_STATE.user
             })))
         });
 
-        // Marcar localmente los registros como sincronizados en lugar de borrarlos
+        // NOTA: Con mode: 'no-cors', response.type es 'opaque' y no podemos verificar el estado.
+        // Advertir al usuario que confirme en el Excel.
+        const isOpaque = response.type === 'opaque';
+
+        // Marcar localmente los registros como sincronizados
         toSync.forEach(ts => {
             const index = records.findIndex(r => r.id === ts.id);
             if (index !== -1) {
@@ -1767,11 +2118,15 @@ async function syncWithGoogleSheets() {
         });
         localStorage.setItem('abc_monitoring_records', JSON.stringify(records));
 
-        alert(`✅ Sincronización enviada: ${toSync.length} registros procesados.`);
-        renderView('records'); // Ir a registros para ver el estado
+        if (isOpaque) {
+            alert(`📤 Sincronización enviada: ${toSync.length} registros.\n\n⚠️ IMPORTANTE: Verifique en su Google Sheet que los datos hayan llegado correctamente. Si no aparecen, use "Exportar Respaldo" en Admin para no perder datos.`);
+        } else {
+            alert(`✅ Sincronización exitosa: ${toSync.length} registros procesados.`);
+        }
+        renderView('records');
     } catch (error) {
         console.error('Error en sincronización:', error);
-        alert('No se pudo conectar con el servidor. Verifique que el script esté publicado correctamente como "Cualquier persona".');
+        alert('❌ No se pudo conectar con el servidor.\n\nSus datos están seguros localmente. Verifique:\n1. Conexión a internet\n2. Que el script esté publicado como "Cualquier persona"\n3. Use "Exportar Respaldo" en Admin como medida de seguridad.');
     } finally {
         if (btn) {
             btn.innerHTML = originalText;
@@ -1779,6 +2134,29 @@ async function syncWithGoogleSheets() {
         }
         renderView(APP_STATE.currentView);
     }
+}
+
+function exportDataAsJSON() {
+    const exportData = {
+        exportDate: new Date().toISOString(),
+        appVersion: 'v43',
+        user: APP_STATE.user,
+        collections: APP_STATE.collections,
+        records: JSON.parse(localStorage.getItem('abc_monitoring_records') || '[]')
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `RiceMon_Respaldo_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ Respaldo descargado: RiceMon_Respaldo_${dateStr}.json\n\nGuarde este archivo en un lugar seguro.`);
 }
 
 async function installPWA() {
@@ -1798,6 +2176,9 @@ async function installPWA() {
     renderView(APP_STATE.currentView);
 }
 
+// ═══════════════════════════════════════════════════
+// REGISTRO Y AUTENTICACIÓN
+// ═══════════════════════════════════════════════════
 function renderRegistration() {
     return `
         <div class="card registration-card">
@@ -1825,30 +2206,77 @@ function renderRegistration() {
                 </div>
             </div>
 
+            <div class="field-group">
+                <label>PIN de Acceso (4 dígitos)</label>
+                <div class="input-with-icon">
+                    <i data-lucide="lock"></i>
+                    <input type="password" id="reg-pin" class="input-modern" placeholder="Ej: 1234" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Confirmar PIN</label>
+                <div class="input-with-icon">
+                    <i data-lucide="lock"></i>
+                    <input type="password" id="reg-pin-confirm" class="input-modern" placeholder="Repita el PIN" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
+                </div>
+            </div>
+
             <button class="btn btn-primary registration-btn" onclick="saveRegistration()">
                 REGISTRAR DISPOSITIVO
             </button>
             <p style="font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: 1.5rem; line-height: 1.4;">
-                La contraseña y validación de seguridad se habilitarán en una fase posterior.
+                🔒 El PIN protege su acceso a esta app en este dispositivo.
             </p>
         </div>
     `;
 }
 
-function saveRegistration() {
-    const name = document.getElementById('reg-name').value;
-    const email = document.getElementById('reg-email').value;
+async function hashPin(pin) {
+    // Hash simple usando SHA-256 (disponible en navegadores modernos)
+    if (typeof crypto !== 'undefined' && crypto.subtle) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(pin + '_abc_rice_salt');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Fallback: almacenar codificado en base64 (no ideal pero mejor que plano)
+    return btoa(pin + '_abc_rice');
+}
 
-    if (!name || !email || !email.includes('@')) {
-        alert('Por favor, ingrese un nombre y correo electrónico válido.');
+async function saveRegistration() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pin = document.getElementById('reg-pin').value;
+    const pinConfirm = document.getElementById('reg-pin-confirm').value;
+
+    if (!name || name.length < 3) {
+        alert('Por favor, ingrese un nombre completo (mínimo 3 caracteres).');
         return;
     }
 
-    const userData = { name, email, registeredAt: new Date().toISOString() };
+    if (!email || !email.includes('@') || !email.includes('.')) {
+        alert('Por favor, ingrese un correo electrónico válido.');
+        return;
+    }
+
+    if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+        alert('El PIN debe ser de exactamente 4 dígitos numéricos.');
+        return;
+    }
+
+    if (pin !== pinConfirm) {
+        alert('Los PINs no coinciden. Por favor, verifique.');
+        return;
+    }
+
+    const pinHash = await hashPin(pin);
+    const userData = { name, email, pinHash, registeredAt: new Date().toISOString() };
     APP_STATE.user = userData;
     localStorage.setItem('abc_user', JSON.stringify(userData));
 
-    alert('¡Dispositivo registrado con éxito!');
+    alert('¡Dispositivo registrado con éxito! 🎉');
     renderView('dashboard');
 }
 

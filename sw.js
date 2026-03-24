@@ -1,19 +1,36 @@
-const CACHE_NAME = 'abc-rice-v42';
+const CACHE_NAME = 'abc-rice-v43';
 const ASSETS = [
     './',
     './index.html',
-    './style.css?v=42',
-    './app.js?v=42',
+    './style.css?v=43',
+    './app.js?v=43',
     './rice_field_bg.jpg',
     './manifest.json',
     './icon-512.png',
     './logo.png'
 ];
 
+// Recursos externos a pre-cachear para funcionamiento offline completo
+const EXTERNAL_ASSETS = [
+    'https://unpkg.com/lucide@0.577.0',
+    'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap'
+];
+
 self.addEventListener('install', event => {
     self.skipWaiting(); // Forzar actualización inmediata
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+        caches.open(CACHE_NAME).then(async cache => {
+            // Cachear assets locales
+            await cache.addAll(ASSETS);
+            // Cachear assets externos (no bloquear si fallan)
+            for (const url of EXTERNAL_ASSETS) {
+                try {
+                    await cache.add(url);
+                } catch (e) {
+                    console.warn('No se pudo pre-cachear recurso externo:', url, e);
+                }
+            }
+        })
     );
 });
 
