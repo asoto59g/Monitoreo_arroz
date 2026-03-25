@@ -1,6 +1,6 @@
 # 🌾 Plagueo en Arroz
 ### Sistema de Monitoreo Fitosanitario para Cultivos de Arroz
-**Desarrollado por [ABC Geomática Agrícola SRL](https://abcgeomatica.com)** · Temporada 2026
+**Desarrollado por [ABC Geomática Agrícola SRL](https://abcgeomaticagricola.com)** · Temporada 2026
 
 ---
 
@@ -76,6 +76,8 @@ Datos agronómicos adicionales:
 
 Los registros se guardan localmente en el dispositivo y pueden sincronizarse a una hoja de cálculo de Google mediante un **Google Apps Script**. Compatible con trabajo sin internet.
 
+https://script.google.com/macros/s/AKfycbxqg_ZNkjEH2Bx73aZnsqMIAGd_9c2ChMHeEWO5dAcOUbGVIbVnL57JLNWUDmdYpfv7/exec
+
 ---
 
 ## ⚙️ Administración
@@ -90,6 +92,8 @@ La sección **Admin** permite gestionar:
 ## 📱 Instalación como App
 
 Esta PWA puede instalarse en cualquier dispositivo móvil sin necesidad de tienda de aplicaciones:
+
+https://asoto59g.github.io/Monitoreo_arroz/
 
 - **Android (Chrome):** Menú ⋮ → *Instalar app*
 - **iPhone (Safari):** Botón compartir 🔗 → *Agregar a pantalla de inicio*
