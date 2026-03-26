@@ -400,10 +400,22 @@ function initGPSStatus() {
             const showsCoords = gpsEl.innerHTML.includes('Lat:');
             if (isMonitoring && showsCoords) return;
             
-            gpsEl.innerHTML = 'GPS OFF';
-            gpsEl.style.color = 'var(--accent-red)';
+            // GPS error codes:
+            // 1 = PERMISSION_DENIED
+            // 2 = POSITION_UNAVAILABLE (hardware off or disconnected)
+            // 3 = TIMEOUT (hardware is on but struggling to get a fix, typical when offline)
+            if (error.code === error.TIMEOUT) {
+                gpsEl.innerHTML = 'BUSCANDO GPS...';
+                gpsEl.style.color = 'var(--accent-yellow, #eab308)';
+            } else if (error.code === error.PERMISSION_DENIED) {
+                gpsEl.innerHTML = 'SIN PERMISO';
+                gpsEl.style.color = 'var(--accent-red)';
+            } else {
+                gpsEl.innerHTML = 'GPS OFF';
+                gpsEl.style.color = 'var(--accent-red)';
+            }
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
     
     // Safety fallback: Permissions API (triggers immediately if the user revokes location OS-wide)
