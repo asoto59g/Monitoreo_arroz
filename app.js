@@ -404,10 +404,10 @@ function initGPSStatus() {
             // 1 = PERMISSION_DENIED
             // 2 = POSITION_UNAVAILABLE (hardware off or disconnected)
             // 3 = TIMEOUT (hardware is on but struggling to get a fix, typical when offline)
-            if (error.code === error.TIMEOUT) {
+            if (error.code === 3 /* TIMEOUT */) {
                 gpsEl.innerHTML = 'BUSCANDO GPS...';
                 gpsEl.style.color = 'var(--accent-yellow, #eab308)';
-            } else if (error.code === error.PERMISSION_DENIED) {
+            } else if (error.code === 1 /* PERMISSION_DENIED */) {
                 gpsEl.innerHTML = 'SIN PERMISO';
                 gpsEl.style.color = 'var(--accent-red)';
             } else {
