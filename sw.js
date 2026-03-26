@@ -1,9 +1,9 @@
-const CACHE_NAME = 'abc-rice-v49';
+const CACHE_NAME = 'abc-rice-v50';
 const ASSETS = [
     './',
     './index.html',
-    './style.css?v=48',
-    './app.js?v=48',
+    './style.css?v=50',
+    './app.js?v=50',
     './rice_field_bg.jpg',
     './manifest.json',
     './icon-512.png',
@@ -19,10 +19,9 @@ self.addEventListener('install', event => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then(async cache => {
-            // Caching robusto: uno por uno para que un error en un archivo no mate todo el SW
             const allAssets = [...ASSETS, ...EXTERNAL_ASSETS];
             return Promise.allSettled(
-                allAssets.map(url => cache.add(url).catch(err => console.error('Fallo cacheo de:', url, err)))
+                allAssets.map(url => cache.add(url).catch(err => console.error('Fallo cacheo inicial:', url, err)))
             );
         })
     );
@@ -41,48 +40,52 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-
-    // Estrategia de Navegación (Página principal)
+    // 1. Estrategia para Navegación (Página principal)
+    // Cache-First para arranque instantáneo siempre
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request)
-                .then(response => {
-                    // Si tenemos red, actualizamos el caché de index y respondemos
-                    if (response.ok) {
-                        const copy = response.clone();
+            caches.match('./index.html', { ignoreSearch: true }).then(cachedResponse => {
+                const fetchPromise = fetch(event.request).then(networkResponse => {
+                    if (networkResponse && networkResponse.ok) {
+                        const copy = networkResponse.clone();
                         caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
                     }
-                    return response;
-                })
-                .catch(async () => {
-                    // OFFLINE: Intentamos varias llaves de cache comunes por si acaso
-                    const cache = await caches.open(CACHE_NAME);
-                    const match = await cache.match('./index.html') || await cache.match('./') || await cache.match('index.html');
-                    
-                    if (match) return match;
-                    
-                    // Fallback extremo: si nada coincide, intentamos cualquier cosa que parezca un HTML
-                    return caches.match(event.request);
-                })
+                    return networkResponse;
+                }).catch(() => null);
+                
+                return cachedResponse || fetchPromise;
+            })
         );
         return;
     }
 
-    // Estrategia para Assets (Imágenes, CSS, JS)
-    // Cache-First (Responder rápido) e intentar actualizar en fondo
+    // 2. Estrategia para Assets (Imágenes, CSS, JS)
+    // Cache-First con actualización silenciosa en fondo
     event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
-            const fetchPromise = fetch(event.request).then(networkResponse => {
+        caches.match(event.request, { ignoreSearch: true }).then(cachedResponse => {
+            if (cachedResponse) {
+                // Si tenemos el archivo, lo entregamos ya y actualizamos el cache para la próxima vez
+                fetch(event.request).then(networkResponse => {
+                    if (networkResponse && networkResponse.ok) {
+                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse));
+                    }
+                }).catch(() => {});
+                return cachedResponse;
+            }
+
+            // Si no está en caché, vamos a la red directamente
+            return fetch(event.request).then(networkResponse => {
                 if (networkResponse && networkResponse.ok) {
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, networkResponse.clone());
-                    });
+                    const copy = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
                 }
                 return networkResponse;
-            }).catch(() => null);
-
-            return cachedResponse || fetchPromise;
+            }).catch(() => {
+                // Fallback para imágenes si fallan todas
+                if (event.request.destination === 'image') {
+                    return caches.match('./icon-512.png');
+                }
+            });
         })
     );
 });
