@@ -1510,16 +1510,17 @@ nav.bottom-nav .nav-item.active {
     flex: 1;
 }
 
-.welcome-icon img {
-    width: 90px;
-    height: auto;
+.welcome-icon .rice-graphic {
+    font-size: 4.5rem;
     filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.4));
     animation: floatRice 4s ease-in-out infinite;
+    display: block;
+    line-height: 1;
 }
 
 @keyframes floatRice {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(2deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
 }
 
 .hero-title {

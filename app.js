@@ -605,7 +605,7 @@ function renderDashboard() {
                     <p class="hero-greeting">Hola, ${userName} 👋</p>
                 </div>
                 <div class="welcome-icon">
-                    <img src="icon-512.png" alt="Rice Plant">
+                    <span class="rice-graphic">🌾</span>
                 </div>
             </div>
             
