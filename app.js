@@ -367,50 +367,60 @@ function initGPSStatus() {
     const gpsEl = document.getElementById('gps-status');
     if (!gpsEl) return;
     
-    // Initial UI Setup - GPS OFF if not connected
+    // Initial UI Setup
     gpsEl.innerHTML = 'GPS OFF';
     gpsEl.style.color = 'var(--accent-red)';
     
     if (!("geolocation" in navigator)) return;
-    
-    // Initialize GPS Global state if not present
-    if (typeof APP_STATE.gpsAvailable === 'undefined') {
-        APP_STATE.gpsAvailable = false;
-    }
+    if (typeof APP_STATE.gpsAvailable === 'undefined') APP_STATE.gpsAvailable = false;
 
-    const checkGPS = () => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                APP_STATE.gpsAvailable = true;
-                const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
-                const showsCoords = gpsEl.innerHTML.includes('Lat:');
-                
-                if (isMonitoring && showsCoords) {
-                    return;
-                }
-                
+    // Use watchPosition with HIGH accuracy to force hardware GPS.
+    // Low accuracy relies on IPs/Wi-Fi and stays active even when the physical GPS antenna is disabled.
+    navigator.geolocation.watchPosition(
+        (position) => {
+            const acc = position.coords.accuracy;
+            APP_STATE.gpsAvailable = true;
+            
+            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+            const showsCoords = gpsEl.innerHTML.includes('Lat:');
+            if (isMonitoring && showsCoords) return;
+            
+            // If the simulated/network location triggers, the accuracy will be extremely poor (e.g. >150m)
+            if (acc > 150) {
+                gpsEl.innerHTML = 'GPS DÉBIL (' + Math.round(acc) + 'm)';
+                gpsEl.style.color = 'var(--accent-yellow, #eab308)'; 
+            } else {
                 gpsEl.innerHTML = 'GPS ON';
-                gpsEl.style.color = 'var(--accent-green)'; // green color
-            },
-            (error) => {
-                APP_STATE.gpsAvailable = false;
-                const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
-                const showsCoords = gpsEl.innerHTML.includes('Lat:');
-                
-                if (isMonitoring && showsCoords) {
-                    return;
+                gpsEl.style.color = 'var(--accent-green)';
+            }
+        },
+        (error) => {
+            APP_STATE.gpsAvailable = false;
+            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+            const showsCoords = gpsEl.innerHTML.includes('Lat:');
+            if (isMonitoring && showsCoords) return;
+            
+            gpsEl.innerHTML = 'GPS OFF';
+            gpsEl.style.color = 'var(--accent-red)';
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+    
+    // Safety fallback: Permissions API (triggers immediately if the user revokes location OS-wide)
+    if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
+            result.addEventListener('change', function() {
+                if (this.state === 'denied' || this.state === 'prompt') {
+                    APP_STATE.gpsAvailable = false;
+                    const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+                    const showsCoords = gpsEl.innerHTML.includes('Lat:');
+                    if (isMonitoring && showsCoords) return;
+                    gpsEl.innerHTML = 'GPS OFF';
+                    gpsEl.style.color = 'var(--accent-red)';
                 }
-                
-                gpsEl.innerHTML = 'GPS OFF';
-                gpsEl.style.color = 'var(--accent-red)'; // red color
-            },
-            { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
-        );
-    };
-
-    // Check once immediately, then interval
-    checkGPS();
-    setInterval(checkGPS, 5000);
+            });
+        }).catch(() => {});
+    }
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
