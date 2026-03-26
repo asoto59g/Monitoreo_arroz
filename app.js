@@ -370,7 +370,6 @@ function initGPSStatus() {
     // Configuración visual inicial
     gpsEl.innerHTML = 'GPS OFF';
     gpsEl.style.color = 'var(--accent-red)';
-    // Agregar cursor pointer para invitar al clic de refresco
     gpsEl.style.cursor = 'pointer';
     
     if (!("geolocation" in navigator)) return;
@@ -380,8 +379,6 @@ function initGPSStatus() {
     let isChecking = false;
 
     const pollGPS = () => {
-        // No pedir GPS si la app esta en segundo plano (ej: leyendo notificaciones o menu de Android)
-        // Ya que Chrome bloquea a las apps que piden GPS en segundo plano y las congela.
         if (document.visibilityState === 'hidden') {
             gpsTimer = setTimeout(pollGPS, 5000);
             return;
@@ -393,20 +390,15 @@ function initGPSStatus() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 isChecking = false;
-                const acc = position.coords.accuracy;
                 APP_STATE.gpsAvailable = true;
                 
                 const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
                 const showsCoords = gpsEl.innerHTML.includes('Lat:');
                 
                 if (!isMonitoring || !showsCoords) {
-                    if (acc > 150) {
-                        gpsEl.innerHTML = 'GPS DÉBIL (' + Math.round(acc) + 'm)';
-                        gpsEl.style.color = 'var(--accent-yellow, #eab308)'; 
-                    } else {
-                        gpsEl.innerHTML = 'GPS ON';
-                        gpsEl.style.color = 'var(--accent-green)';
-                    }
+                    // Mantenemos la lógica binaria simple exigida: Si hay latitud (incluso débil), está ON.
+                    gpsEl.innerHTML = 'GPS ON';
+                    gpsEl.style.color = 'var(--accent-green)';
                 }
                 
                 clearTimeout(gpsTimer);
@@ -414,18 +406,20 @@ function initGPSStatus() {
             },
             (error) => {
                 isChecking = false;
-                APP_STATE.gpsAvailable = false;
+                
                 const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
                 const showsCoords = gpsEl.innerHTML.includes('Lat:');
                 
                 if (!isMonitoring || !showsCoords) {
                     if (error.code === 3 /* TIMEOUT */) {
-                        gpsEl.innerHTML = 'BUSCANDO GPS...';
-                        gpsEl.style.color = 'var(--accent-yellow, #eab308)';
-                    } else if (error.code === 1 /* PERMISSION_DENIED */) {
-                        gpsEl.innerHTML = 'SIN PERMISO';
-                        gpsEl.style.color = 'var(--accent-red)';
+                        // Timeout offline = El hardware SÍ está encendido buscando satélites, pero demora.
+                        // Lo mostramos verde como "ON" para simular el toggle de estado simple.
+                        APP_STATE.gpsAvailable = true;
+                        gpsEl.innerHTML = 'GPS ON';
+                        gpsEl.style.color = 'var(--accent-green)';
                     } else {
+                        // POSITION_UNAVAILABLE (2) o PERMISSION_DENIED (1) = OFF definitivo
+                        APP_STATE.gpsAvailable = false;
                         gpsEl.innerHTML = 'GPS OFF';
                         gpsEl.style.color = 'var(--accent-red)';
                     }
@@ -438,31 +432,21 @@ function initGPSStatus() {
         );
     };
 
-    // Iniciar polling
     pollGPS();
     
-    // Escuchar cuando el usuario vuelve a la app (ej: despues de prender el GPS en el panel de Android)
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-            // Forzar chequeo inmediato
             clearTimeout(gpsTimer);
             isChecking = false;
-            if (!APP_STATE.currentView || !APP_STATE.currentView.startsWith('monitor_') || !gpsEl.innerHTML.includes('Lat:')) {
-                gpsEl.innerHTML = 'VERIFICANDO...';
-                gpsEl.style.color = 'var(--text-secondary)';
-            }
             pollGPS();
         }
     });
 
-    // Permitir refresco manual al tocar la etiqueta
     gpsEl.addEventListener('click', () => {
         const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
         const showsCoords = gpsEl.innerHTML.includes('Lat:');
         if (isMonitoring && showsCoords) return;
 
-        gpsEl.innerHTML = 'VERIFICANDO...';
-        gpsEl.style.color = 'var(--text-secondary)';
         clearTimeout(gpsTimer);
         isChecking = false;
         pollGPS();
