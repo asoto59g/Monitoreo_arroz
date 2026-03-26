@@ -374,51 +374,59 @@ function initGPSStatus() {
     if (!("geolocation" in navigator)) return;
     if (typeof APP_STATE.gpsAvailable === 'undefined') APP_STATE.gpsAvailable = false;
 
-    // Use watchPosition with HIGH accuracy to force hardware GPS.
-    // Low accuracy relies on IPs/Wi-Fi and stays active even when the physical GPS antenna is disabled.
-    navigator.geolocation.watchPosition(
-        (position) => {
-            const acc = position.coords.accuracy;
-            APP_STATE.gpsAvailable = true;
-            
-            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
-            const showsCoords = gpsEl.innerHTML.includes('Lat:');
-            if (isMonitoring && showsCoords) return;
-            
-            // If the simulated/network location triggers, the accuracy will be extremely poor (e.g. >150m)
-            if (acc > 150) {
-                gpsEl.innerHTML = 'GPS DÉBIL (' + Math.round(acc) + 'm)';
-                gpsEl.style.color = 'var(--accent-yellow, #eab308)'; 
-            } else {
-                gpsEl.innerHTML = 'GPS ON';
-                gpsEl.style.color = 'var(--accent-green)';
-            }
-        },
-        (error) => {
-            APP_STATE.gpsAvailable = false;
-            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
-            const showsCoords = gpsEl.innerHTML.includes('Lat:');
-            if (isMonitoring && showsCoords) return;
-            
-            // GPS error codes:
-            // 1 = PERMISSION_DENIED
-            // 2 = POSITION_UNAVAILABLE (hardware off or disconnected)
-            // 3 = TIMEOUT (hardware is on but struggling to get a fix, typical when offline)
-            if (error.code === 3 /* TIMEOUT */) {
-                gpsEl.innerHTML = 'BUSCANDO GPS...';
-                gpsEl.style.color = 'var(--accent-yellow, #eab308)';
-            } else if (error.code === 1 /* PERMISSION_DENIED */) {
-                gpsEl.innerHTML = 'SIN PERMISO';
-                gpsEl.style.color = 'var(--accent-red)';
-            } else {
-                gpsEl.innerHTML = 'GPS OFF';
-                gpsEl.style.color = 'var(--accent-red)';
-            }
-        },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    );
+    // Use a recurring setTimeout instead of watchPosition.
+    // watchPosition in Chrome/Android often permanently dies if initialized while GPS hardware is OFF.
+    const pollGPS = () => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const acc = position.coords.accuracy;
+                APP_STATE.gpsAvailable = true;
+                
+                const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+                const showsCoords = gpsEl.innerHTML.includes('Lat:');
+                
+                if (!isMonitoring || !showsCoords) {
+                    if (acc > 150) {
+                        gpsEl.innerHTML = 'GPS DÉBIL (' + Math.round(acc) + 'm)';
+                        gpsEl.style.color = 'var(--accent-yellow, #eab308)'; 
+                    } else {
+                        gpsEl.innerHTML = 'GPS ON';
+                        gpsEl.style.color = 'var(--accent-green)';
+                    }
+                }
+                
+                // Programar el siguiente chequeo (GPS activo responde rápido)
+                setTimeout(pollGPS, 5000);
+            },
+            (error) => {
+                APP_STATE.gpsAvailable = false;
+                const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+                const showsCoords = gpsEl.innerHTML.includes('Lat:');
+                
+                if (!isMonitoring || !showsCoords) {
+                    if (error.code === 3 /* TIMEOUT */) {
+                        gpsEl.innerHTML = 'BUSCANDO GPS...';
+                        gpsEl.style.color = 'var(--accent-yellow, #eab308)';
+                    } else if (error.code === 1 /* PERMISSION_DENIED */) {
+                        gpsEl.innerHTML = 'SIN PERMISO';
+                        gpsEl.style.color = 'var(--accent-red)';
+                    } else {
+                        gpsEl.innerHTML = 'GPS OFF';
+                        gpsEl.style.color = 'var(--accent-red)';
+                    }
+                }
+                
+                // Seguir intentando recuperar la señal si está apagado o en timeout
+                setTimeout(pollGPS, 5000);
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+    };
+
+    // Iniciar polling
+    pollGPS();
     
-    // Safety fallback: Permissions API (triggers immediately if the user revokes location OS-wide)
+    // Safety fallback: Permissions API
     if (navigator.permissions && navigator.permissions.query) {
         navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
             result.addEventListener('change', function() {
@@ -426,9 +434,10 @@ function initGPSStatus() {
                     APP_STATE.gpsAvailable = false;
                     const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
                     const showsCoords = gpsEl.innerHTML.includes('Lat:');
-                    if (isMonitoring && showsCoords) return;
-                    gpsEl.innerHTML = 'GPS OFF';
-                    gpsEl.style.color = 'var(--accent-red)';
+                    if (!isMonitoring || !showsCoords) {
+                        gpsEl.innerHTML = 'GPS OFF';
+                        gpsEl.style.color = 'var(--accent-red)';
+                    }
                 }
             });
         }).catch(() => {});
