@@ -335,18 +335,37 @@ const THRESHOLDS_DATA = {
 // ═══════════════════════════════════════════════════
 // INICIALIZACIÓN Y NAVEGACIÓN
 // ═══════════════════════════════════════════════════
-// Initialization
 document.addEventListener('DOMContentLoaded', () => {
-    initNavigation();
-    initOnlineStatus();
-    initGPSStatus();
-    renderView('dashboard');
+    try {
+        initNavigation();
+        initOnlineStatus();
+        initGPSStatus();
+        
+        // Cargar vista inicial basándonos en si el usuario ya existe
+        if (APP_STATE.user) {
+            renderView('dashboard');
+        } else {
+            renderView('registration');
+        }
+    } catch (e) {
+        console.error("Falla crítica en inicialización:", e);
+        const main = document.getElementById('main-content');
+        if (main) main.innerHTML = `<div class='card error'><h3>Error al cargar</h3><p>Intente recargar la página: ${e.message}</p></div>`;
+    }
 });
 
 function initOnlineStatus() {
+    const banner = document.getElementById('offline-banner');
+    
     const update = () => {
         APP_STATE.isOnline = navigator.onLine;
         const syncEl = document.getElementById('sync-status');
+        
+        // Manejo del Banner Offline
+        if (banner) {
+            banner.style.display = APP_STATE.isOnline ? 'none' : 'flex';
+        }
+
         if (syncEl) {
             if (APP_STATE.isOnline) {
                 syncEl.innerHTML = '🟢 EN LÍNEA';
@@ -359,7 +378,6 @@ function initOnlineStatus() {
     };
     window.addEventListener('online', update);
     window.addEventListener('offline', update);
-    // Estado inicial
     setTimeout(update, 500);
 }
 

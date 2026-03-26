@@ -16,6 +16,30 @@
     --nav-bg: rgba(7, 12, 24, 0.8);
 }
 
+.offline-banner {
+    background: linear-gradient(to right, #7f1d1d, #450a0a);
+    color: white;
+    text-align: center;
+    padding: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+    width: 100%;
+    animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+    0% { opacity: 0.9; }
+    50% { opacity: 1; }
+    100% { opacity: 0.9; }
+}
+
 * {
     box-sizing: border-box;
     margin: 0;

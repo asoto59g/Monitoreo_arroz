@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Plagueo en Arroz - ABC Geomática</title>
-    <link rel="stylesheet" href="style.css?v=47">
+    <link rel="stylesheet" href="style.css?v=48">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -25,6 +25,12 @@
         <div class="blob blob-5"></div>
         <div class="blob blob-6"></div>
         <div class="orbital-lines"></div>
+    </div>
+
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="offline-banner" style="display: none;">
+        <i data-lucide="wifi-off"></i>
+        <span>Modo Offline: Trabajando localmente</span>
     </div>
 
     <div id="app" class="app-container">
@@ -71,7 +77,7 @@
                 .catch(err => console.log('Error al registrar Service Worker', err));
         }
     </script>
-    <script src="app.js?v=47"></script>
+    <script src="app.js?v=48"></script>
 </body>
 
 </html>

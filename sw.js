@@ -1,9 +1,9 @@
-const CACHE_NAME = 'abc-rice-v47';
+const CACHE_NAME = 'abc-rice-v48';
 const ASSETS = [
     './',
     './index.html',
-    './style.css?v=47',
-    './app.js?v=47',
+    './style.css?v=48',
+    './app.js?v=48',
     './rice_field_bg.jpg',
     './manifest.json',
     './icon-512.png',
@@ -17,15 +17,14 @@ const EXTERNAL_ASSETS = [
 ];
 
 self.addEventListener('install', event => {
-    self.skipWaiting(); // Forzar actualización inmediata
+    self.skipWaiting(); 
     event.waitUntil(
         caches.open(CACHE_NAME).then(async cache => {
-            // Cachear assets locales
             await cache.addAll(ASSETS);
-            // Cachear assets externos (no bloquear si fallan)
             for (const url of EXTERNAL_ASSETS) {
                 try {
-                    await cache.add(url);
+                    const response = await fetch(url);
+                    if (response.ok) await cache.put(url, response);
                 } catch (e) {
                     console.warn('No se pudo pre-cachear recurso externo:', url, e);
                 }
@@ -44,50 +43,46 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
-        }).then(() => self.clients.claim()) // Tomar control inmediatamente
+        }).then(() => self.clients.claim()) 
     );
 });
 
 self.addEventListener('fetch', event => {
-    // Para navegación puramente HTML (cuando se abre la PWA)
+    const url = new URL(event.request.url);
+
+    // Estrategia Especial para la Navegación (Abrir la App)
+    // Intentamos red con un timeout de 3 segundos, si no responde, vamos a cache.
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => {
-                return caches.match('./index.html');
-            })
-        );
-        return;
-    }
+            new Promise((resolve) => {
+                const timeoutId = setTimeout(() => {
+                    caches.match('./index.html').then(resolve);
+                }, 3000);
 
-    // Recursos externos (Iconos, Google Fonts, unpkg)
-    if (event.request.url.startsWith('http') && !event.request.url.includes(self.location.origin)) {
-        event.respondWith(
-            caches.match(event.request).then(cachedResponse => {
-                if (cachedResponse) return cachedResponse;
-                return fetch(event.request).then(networkResponse => {
-                    return caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, networkResponse.clone());
-                        return networkResponse;
-                    });
+                fetch(event.request).then(response => {
+                    clearTimeout(timeoutId);
+                    resolve(response);
                 }).catch(() => {
-                    console.warn('Recurso externo no disponible offline:', event.request.url);
+                    clearTimeout(timeoutId);
+                    caches.match('./index.html').then(resolve);
                 });
             })
         );
         return;
     }
 
-    // Estrategia Stale-While-Revalidate para el resto (CSS, JS)
+    // Recursos Locales (CSS, JS, Imágenes)
+    // Estrategia: Cache-First, then Update in Background
     event.respondWith(
         caches.match(event.request).then(cachedResponse => {
             const fetchPromise = fetch(event.request).then(networkResponse => {
-                return caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, networkResponse.clone());
-                    return networkResponse;
-                });
-            }).catch(() => {
-                // Ignore fallos de red aquí
-            });
+                if (networkResponse && networkResponse.status === 200) {
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, networkResponse.clone());
+                    });
+                }
+                return networkResponse;
+            }).catch(() => null);
 
             return cachedResponse || fetchPromise;
         })
