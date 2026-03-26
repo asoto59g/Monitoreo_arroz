@@ -599,9 +599,14 @@ function renderDashboard() {
 
     return `
         <div class="dashboard-hero slide-up">
-            <div class="card welcome-card">
-                <h1 class="hero-title">Sistema de Monitoreo de Plagas</h1>
-                <p class="hero-greeting"><span class="emoji-rice">🌾</span> Hola, ${userName} 👋</p>
+            <div class="card welcome-card dashboard-welcome">
+                <div class="welcome-text">
+                    <h1 class="hero-title">Sistema de Monitoreo de Arroz</h1>
+                    <p class="hero-greeting">Hola, ${userName} 👋</p>
+                </div>
+                <div class="welcome-icon">
+                    <img src="icon-512.png" alt="Rice Plant">
+                </div>
             </div>
             
             <div class="card action-container">

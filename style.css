@@ -1495,29 +1495,49 @@ nav.bottom-nav .nav-item.active {
 .welcome-card {
     background: rgba(0, 0, 0, 0.5);
     border-color: rgba(0, 242, 254, 0.3);
-    padding: 2.25rem 1.75rem;
+    padding: 2rem 1.5rem;
     box-shadow: 0 0 40px rgba(0, 242, 254, 0.15);
 }
 
+.dashboard-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+}
+
+.welcome-text {
+    flex: 1;
+}
+
+.welcome-icon img {
+    width: 90px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.4));
+    animation: floatRice 4s ease-in-out infinite;
+}
+
+@keyframes floatRice {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+}
+
 .hero-title {
-    font-size: 1.85rem;
+    font-size: 1.75rem;
     font-weight: 800;
     line-height: 1.1;
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.5rem;
     letter-spacing: -0.5px;
+    background: linear-gradient(to bottom, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero-greeting {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
     font-weight: 500;
-}
-
-.emoji-rice {
-    font-size: 1.5rem;
 }
 
 .action-container {
