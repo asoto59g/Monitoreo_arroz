@@ -378,38 +378,39 @@ function initGPSStatus() {
         APP_STATE.gpsAvailable = false;
     }
 
-    navigator.geolocation.watchPosition(
-        (position) => {
-            APP_STATE.gpsAvailable = true;
-            // Check if we are currently in a monitoring flow
-            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
-            // Check if the label currently shows coordinates (which means we are in the process of adding a record)
-            const showsCoords = gpsEl.innerHTML.includes('Lat:');
-            
-            if (isMonitoring && showsCoords) {
-                // If we're monitoring and it's already showing the static logged coordinates, leave it as is.
-                return;
-            }
-            
-            // Otherwise, show the active GPS status
-            gpsEl.innerHTML = 'GPS ON';
-            gpsEl.style.color = 'var(--accent-green)'; // green color
-        },
-        (error) => {
-            APP_STATE.gpsAvailable = false;
-            // Only overwrite if we are not actively showing the logged coordinates in the monitoring flow
-            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
-            const showsCoords = gpsEl.innerHTML.includes('Lat:');
-            
-            if (isMonitoring && showsCoords) {
-                return;
-            }
-            
-            gpsEl.innerHTML = 'GPS OFF';
-            gpsEl.style.color = 'var(--accent-red)'; // red color
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+    const checkGPS = () => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                APP_STATE.gpsAvailable = true;
+                const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+                const showsCoords = gpsEl.innerHTML.includes('Lat:');
+                
+                if (isMonitoring && showsCoords) {
+                    return;
+                }
+                
+                gpsEl.innerHTML = 'GPS ON';
+                gpsEl.style.color = 'var(--accent-green)'; // green color
+            },
+            (error) => {
+                APP_STATE.gpsAvailable = false;
+                const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+                const showsCoords = gpsEl.innerHTML.includes('Lat:');
+                
+                if (isMonitoring && showsCoords) {
+                    return;
+                }
+                
+                gpsEl.innerHTML = 'GPS OFF';
+                gpsEl.style.color = 'var(--accent-red)'; // red color
+            },
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
+        );
+    };
+
+    // Check once immediately, then interval
+    checkGPS();
+    setInterval(checkGPS, 5000);
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
