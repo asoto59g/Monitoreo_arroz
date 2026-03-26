@@ -339,6 +339,7 @@ const THRESHOLDS_DATA = {
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initOnlineStatus();
+    initGPSStatus();
     renderView('dashboard');
 });
 
@@ -360,6 +361,55 @@ function initOnlineStatus() {
     window.addEventListener('offline', update);
     // Estado inicial
     setTimeout(update, 500);
+}
+
+function initGPSStatus() {
+    const gpsEl = document.getElementById('gps-status');
+    if (!gpsEl) return;
+    
+    // Initial UI Setup - GPS OFF if not connected
+    gpsEl.innerHTML = 'GPS OFF';
+    gpsEl.style.color = 'var(--accent-red)';
+    
+    if (!("geolocation" in navigator)) return;
+    
+    // Initialize GPS Global state if not present
+    if (typeof APP_STATE.gpsAvailable === 'undefined') {
+        APP_STATE.gpsAvailable = false;
+    }
+
+    navigator.geolocation.watchPosition(
+        (position) => {
+            APP_STATE.gpsAvailable = true;
+            // Check if we are currently in a monitoring flow
+            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+            // Check if the label currently shows coordinates (which means we are in the process of adding a record)
+            const showsCoords = gpsEl.innerHTML.includes('Lat:');
+            
+            if (isMonitoring && showsCoords) {
+                // If we're monitoring and it's already showing the static logged coordinates, leave it as is.
+                return;
+            }
+            
+            // Otherwise, show the active GPS status
+            gpsEl.innerHTML = 'GPS ON';
+            gpsEl.style.color = 'var(--accent-green)'; // green color
+        },
+        (error) => {
+            APP_STATE.gpsAvailable = false;
+            // Only overwrite if we are not actively showing the logged coordinates in the monitoring flow
+            const isMonitoring = APP_STATE.currentView && APP_STATE.currentView.startsWith('monitor_');
+            const showsCoords = gpsEl.innerHTML.includes('Lat:');
+            
+            if (isMonitoring && showsCoords) {
+                return;
+            }
+            
+            gpsEl.innerHTML = 'GPS OFF';
+            gpsEl.style.color = 'var(--accent-red)'; // red color
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -407,6 +457,20 @@ function renderView(viewName, preserveScroll) {
 
     if (bottomNav) bottomNav.style.display = 'flex';
     APP_STATE.currentView = viewName;
+
+    // Reset GPS label if exiting monitoring
+    if (!viewName.startsWith('monitor_')) {
+        const gpsEl = document.getElementById('gps-status');
+        if (gpsEl) {
+            if (APP_STATE.gpsAvailable) {
+                gpsEl.innerHTML = 'GPS ON';
+                gpsEl.style.color = 'var(--accent-green)';
+            } else {
+                gpsEl.innerHTML = 'GPS OFF';
+                gpsEl.style.color = 'var(--accent-red)';
+            }
+        }
+    }
 
     switch (viewName) {
         case 'registration':
