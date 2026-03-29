@@ -8,7 +8,6 @@ Siga estos pasos para asegurar que los datos viajen correctamente de su teléfon
 ## PASO 2: Pegar el Código Corregido
 1. Borre el código actual y pegue este (actualizado para mayor confiabilidad):
 
-```javascript
 function doPost(e) {
   // NOTA: Si presiona "Ejecutar" en el editor verá un error de 'postData', es NORMAL.
   // El script solo funciona cuando recibe datos de la App.
@@ -47,7 +46,6 @@ function testSheet() {
   sheet.appendRow(["TEST", new Date(), "Prueba de conexión exitosa"]);
   Logger.log("Fila de prueba añadida correctamente.");
 }
-```
 
 2. Haga clic en **Guardar** y luego en **Ejecutar** seleccionando la función **`testSheet`** (arriba, al lado del botón Ejecutar) para dar permisos.
    > [!CAUTION]
