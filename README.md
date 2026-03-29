@@ -1,6 +1,6 @@
 # 🌾 Plagueo en Arroz
 ### Sistema de Monitoreo Fitosanitario para Cultivos de Arroz
-**Desarrollado por [ABC Geomática Agrícola SRL]** · Temporada 2026
+**Desarrollado por ABC Geomática Agrícola SRL** · Temporada 2026
 
 ---
 
