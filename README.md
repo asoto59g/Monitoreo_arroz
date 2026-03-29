@@ -73,7 +73,7 @@ Datos agronómicos adicionales:
 ---
 ### 6. 📱 Instalación como App
 
-Esta PWA puede instalarse en cualquier dispositivo móvil sin necesidad de tienda de aplicaciones:
+Esta PWA puede instalarse en cualquier dispositivo móvil sin necesidad de tienda de aplicaciones desde siguiente link:
 
 https://asoto59g.github.io/Monitoreo_arroz/
 
