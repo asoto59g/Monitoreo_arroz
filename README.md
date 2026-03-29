@@ -12,7 +12,7 @@ La aplicación permite registrar plagas, enfermedades, malezas y datos de crecim
 
 ---
 
-## 🚀 Funcionalidades
+##  🚀 Funcionalidades
 
 ### 1. 📍 Datos del Encabezado
 Antes de iniciar cada recorrido, el plaguero selecciona:
@@ -71,25 +71,7 @@ Datos agronómicos adicionales:
 - 🌾 Estado fenológico (Vegetativo / Reproductivo / Maduración / Cosecha)
 
 ---
-
-### 6. ☁️ Sincronización con Google Sheets
-
-Los registros se guardan localmente en el dispositivo y pueden sincronizarse a una hoja de cálculo de Google mediante un **Google Apps Script**. Compatible con trabajo sin internet.
-
-https://script.google.com/macros/s/AKfycbxqg_ZNkjEH2Bx73aZnsqMIAGd_9c2ChMHeEWO5dAcOUbGVIbVnL57JLNWUDmdYpfv7/exec
-
----
-
-## ⚙️ Administración
-
-La sección **Admin** permite gestionar:
-- 🔄 **Ciclos agrícolas** (crear/eliminar temporadas)
-- 🏠 **Fincas** (registrar propiedades)
-- 🗂️ **Lotes/Parcelas** (asociados a fincas y ciclos, con variedad y área)
-
----
-
-## 📱 Instalación como App
+### 6. 📱 Instalación como App
 
 Esta PWA puede instalarse en cualquier dispositivo móvil sin necesidad de tienda de aplicaciones:
 
@@ -99,8 +81,26 @@ https://asoto59g.github.io/Monitoreo_arroz/
 - **iPhone (Safari):** Botón compartir 🔗 → *Agregar a pantalla de inicio*
 
 ---
+### 7. ☁️ Sincronización con Google Sheets
 
-## 🛠️ Tecnologías Utilizadas
+Los registros se guardan localmente en el dispositivo y pueden sincronizarse a una hoja de cálculo de Google mediante un **Google Apps Script**. Compatible con trabajo sin internet.
+
+https://script.google.com/macros/s/AKfycbxqg_ZNkjEH2Bx73aZnsqMIAGd_9c2ChMHeEWO5dAcOUbGVIbVnL57JLNWUDmdYpfv7/exec
+
+---
+
+
+### 8. ⚙️ Administración
+
+La sección **Admin** permite gestionar:
+- 🔄 **Ciclos agrícolas** (crear/eliminar temporadas)
+- 🏠 **Fincas** (registrar propiedades)
+- 🗂️ **Lotes/Parcelas** (asociados a fincas y ciclos, con variedad y área)
+
+---
+
+
+### 9. 🛠️ Tecnologías Utilizadas
 
 | Tecnología | Uso |
 |---|---|
@@ -114,7 +114,7 @@ https://asoto59g.github.io/Monitoreo_arroz/
 
 ---
 
-## 📁 Estructura del Proyecto
+### 10. 📁 Estructura del Proyecto
 
 ```
 📦 Plagueo en Arroz/
@@ -128,7 +128,7 @@ https://asoto59g.github.io/Monitoreo_arroz/
 
 ---
 
-## 👤 Créditos
+### 11. 👤 Créditos
 
 **Desarrollado por:** ABC Geomática Agrícola SRL  
 **Temporada:** 2026  
